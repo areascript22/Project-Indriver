@@ -1,0 +1,27 @@
+/* Centrado del contenedor */
+.vh-100 {
+  height: 100vh;
+}
+
+.card {
+  border-radius: 10px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Angular Material components */
+mat-spinner{
+  margin: auto;
+}

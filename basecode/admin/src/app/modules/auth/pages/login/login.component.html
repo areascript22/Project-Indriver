@@ -1,0 +1,90 @@
+<div class="d-flex justify-content-center align-items-center vh-100">
+  <div class="card p-4 shadow" style="width: 350px">
+    <h3 class="text-center mb-4">Iniciar Sesión</h3>
+    <form [formGroup]="loginForm" (ngSubmit)="signIn()">
+      <!-- Campo de Email -->
+      <div class="mb-3">
+        <label for="email" class="form-label">Correo Electrónico</label>
+        <input
+          type="email"
+          class="form-control"
+          id="email"
+          formControlName="email"
+          placeholder="Ingrese su correo"
+        />
+        <!-- Validation Error Message -->
+        <div
+          *ngIf="
+            loginForm.get('email')?.invalid && loginForm.get('email')?.touched
+          "
+          class="text-danger"
+        >
+          <small *ngIf="loginForm.get('email')?.errors?.['required']"
+            >El correo es obligatorio.</small
+          >
+          <small *ngIf="loginForm.get('email')?.errors?.['email']"
+            >Ingrese un correo válido.</small
+          >
+        </div>
+      </div>
+
+      <!-- Campo de Contraseña -->
+      <div class="mb-3">
+        <label for="password" class="form-label">Contraseña</label>
+        <div class="input-group">
+          <input
+            [type]="passwordVisible ? 'text' : 'password'"
+            class="form-control"
+            id="password"
+            formControlName="password"
+            placeholder="Ingrese su contraseña"
+          />
+          <button
+            type="button"
+            class="input-group-text"
+            (click)="togglePasswordVisibility()"
+          >
+            <i [class]="passwordVisible ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+          </button>
+        </div>
+      
+        <!-- Validation Error Message -->
+        <div
+          *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+          class="text-danger"
+        >
+          <small *ngIf="loginForm.get('password')?.errors?.['required']">
+            La contraseña es obligatoria.
+          </small>
+          <small *ngIf="loginForm.get('password')?.errors?.['minlength']">
+            La contraseña debe tener al menos 6 caracteres.
+          </small>
+        </div>
+      </div>
+      
+
+      <!-- Botón de Enviar -->
+      <div class="d-grid" style="position: relative; text-align: center">
+        <!-- Spinner -->
+        <mat-spinner
+          [diameter]="40"
+          *ngIf="isLoading"
+        
+        ></mat-spinner>
+
+        <!-- Button -->
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="loginForm.invalid || isLoading"
+          (click)="signIn()"
+          *ngIf="!isLoading"
+        >
+          Iniciar Sesión
+        </button>
+        <!-- Password recovery -->
+        <a class="mt-2" routerLink="/auth/password-recovery">Recuperar contraseña</a>
+      </div>
+    </form>
+  </div>
+</div>

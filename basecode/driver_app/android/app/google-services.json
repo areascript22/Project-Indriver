@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "328876787901",
+    "firebase_url": "https://indriver-clon-default-rtdb.firebaseio.com",
+    "project_id": "indriver-clon",
+    "storage_bucket": "indriver-clon.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:328876787901:android:02b9581903ad0e7e080fd4",
+        "android_client_info": {
+          "package_name": "com.example.driver_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAU774UqZTwdjrFuhLag2Pmx2bpyNM6IxM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:328876787901:android:ff8010cb732c6348080fd4",
+        "android_client_info": {
+          "package_name": "com.example.passenger_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAU774UqZTwdjrFuhLag2Pmx2bpyNM6IxM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

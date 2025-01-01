@@ -1,0 +1,43 @@
+<mat-toolbar class="mat-elevation-z3">
+  <button mat-icon-button (click)="collapsed.set(!collapsed())">
+    <mat-icon >menu</mat-icon>
+  </button>
+  <!-- Spacer pushes content to the right -->
+  <span class="spacer"></span>
+
+  <!-- Right-side button -->
+  <button mat-raised-button color="warn" (click)="signOut()">
+    Cerrar sesión
+  </button>
+  
+</mat-toolbar>
+
+<mat-sidenav-container>
+  <mat-sidenav opened="" mode="side" [style.width]="sideNavWidth()">
+    <app-custom-sidenav [collapsed]="collapsed()">
+
+    </app-custom-sidenav>
+  </mat-sidenav>
+  
+  <mat-sidenav-content class="content" [style.margin-left]="sideNavWidth()"> 
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+<!-- <mat-drawer-container class="example-container" autosize>
+  <mat-drawer #drawer class="example-sidenav" mode="side">
+    <p>Auto-resizing sidenav</p>
+    @if (showFiller) {
+      <p>Lorem, ipsum dolor sit amet consectetur.</p>
+    }
+    <button (click)="showFiller = !showFiller" mat-raised-button>
+      Toggle extra text
+    </button>
+  </mat-drawer>
+
+  <div class="example-sidenav-content">
+    <button type="button" mat-button (click)="drawer.toggle()">
+      Toggle sidenav
+    </button>
+  </div>
+
+</mat-drawer-container> -->
