@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
-import 'package:passenger_app/features/map/model/route_info.dart';
+import 'package:passenger_app/shared/models/route_info.dart';
 import 'package:passenger_app/features/map/repositorie/map_services.dart';
 import 'package:image/image.dart' as img;
 import 'package:passenger_app/shared/providers/shared_provider.dart';
+import 'package:passenger_app/shared/repositories/shared_service.dart';
 
 class MapViewModel extends ChangeNotifier {
   final String apiKey = "AIzaSyDm2_br4_go6Tf6QhVczmXnNHwuJYZUZDs";
@@ -21,24 +22,16 @@ class MapViewModel extends ChangeNotifier {
   //MARKS AND POLYLINES
   double _mainIconSize = 30;
   bool _isMovingMap = false;
-  bool _isRouteDrawn = false;
-  bool _selectingPickUpOrDropOff =
-      true; //True:selectin pick up location, else DropOff
+  // bool _isRouteDrawn = false;
+
   bool _enteredInSelectingLocationMode =
       false; //True i am selecting any location
   BitmapDescriptor? pickUpMarker;
   BitmapDescriptor? dropOffMarker;
-  // Polyline polylineFromPickUpToDropOff =
-  //     const Polyline(polylineId: PolylineId("default"));
-  //Coordinated and locations
-  // String? _pickUpLocation;
-  // String? _dropOffLocation;
-  // LatLng? _pickUpCoordenates;
-  // LatLng? _dropOffCoordenates;
-  // String? _duration;
 
   Completer<GoogleMapController> mapController = Completer();
-  Set<Marker> _markers = {};
+
+
   // Set<Polyline> _polylines = {};
 
   //SEARCH DIRECTIONS BOTTOM SHEET
@@ -57,11 +50,11 @@ class MapViewModel extends ChangeNotifier {
   bool get loading => _loading;
   double get mainIconSize => _mainIconSize;
   bool get isMovingMap => _isMovingMap;
-  bool get isRouteDrawn => _isRouteDrawn;
-  bool get selectingPickUpOrDropOff => _selectingPickUpOrDropOff;
+  // bool get isRouteDrawn => _isRouteDrawn;
+
   bool get enteredInSelectingLocationMode => _enteredInSelectingLocationMode;
 
-  Set<Marker> get markers => _markers;
+
 
   bool get searchingDirections => _searchingDirections;
   bool get isPickUpFocussed => _isPickUpFocussed;
@@ -83,24 +76,19 @@ class MapViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  set isRouteDrawn(bool value) {
-    _isRouteDrawn = value;
-    notifyListeners();
-  }
+  // set isRouteDrawn(bool value) {
+  //   _isRouteDrawn = value;
+  //   notifyListeners();
+  // }
 
-  set selectingPickUpOrDropOff(bool value) {
-    _selectingPickUpOrDropOff = value;
-    notifyListeners();
-  }
+
 
   set enteredInSelectingLocationMode(bool value) {
     _enteredInSelectingLocationMode = value;
     notifyListeners();
   }
 
-  set markers(Set<Marker> value) {
-    _markers = value;
-  }
+ 
 
   set searchingDirections(bool value) {
     _searchingDirections = value;
@@ -120,7 +108,8 @@ class MapViewModel extends ChangeNotifier {
   //FUNCTIONS
 
   //Initialize all necesary data
-  Future<void> initializeAnimations(TickerProvider vsyn) async {
+  Future<void> initializeAnimations(
+      TickerProvider vsyn, SharedProvider sharedProvider) async {
     //Initialize animation controller
     animController = AnimationController(
       duration: const Duration(milliseconds: 250),
@@ -149,6 +138,8 @@ class MapViewModel extends ChangeNotifier {
         await convertImageToBitmapDescriptor('assets/img/location1.png');
     dropOffMarker =
         await convertImageToBitmapDescriptor('assets/img/location2.png');
+    sharedProvider.driverIcon =
+        await convertImageToBitmapDescriptor('assets/img/taxi.png');
   }
 
 //Convert an image from asset into BitmapDescription
@@ -176,10 +167,10 @@ class MapViewModel extends ChangeNotifier {
     if (enteredInSelectingLocationMode ||
         sharedProvider.dropOffLocation == null) {
       logger.i("Hide bottom sheet func: ");
-      if (selectingPickUpOrDropOff) {
+      if (sharedProvider.selectingPickUpOrDropOff) {
         sharedProvider.pickUpLocation = null;
       }
-      if (!selectingPickUpOrDropOff) {
+      if (!sharedProvider.selectingPickUpOrDropOff) {
         sharedProvider.dropOffLocation = null;
       }
     }
@@ -200,23 +191,23 @@ class MapViewModel extends ChangeNotifier {
             (!enteredInSelectingLocationMode &&
                 sharedProvider.dropOffCoordenates == null)) {
           if (sharedProvider.pickUpCoordenates != null &&
-              selectingPickUpOrDropOff) {
+             sharedProvider. selectingPickUpOrDropOff) {
             // await getDirectionsText(pickUpCoordenates!);
             sharedProvider.pickUpLocation =
                 await MapServices.getReadableAddress(
                     sharedProvider.pickUpCoordenates!.latitude,
                     sharedProvider.pickUpCoordenates!.longitude,
                     apiKey);
-            addMarkerToMap(sharedProvider.pickUpCoordenates!);
+            addPickUpOrDropOffMarkerToMap(sharedProvider.pickUpCoordenates!,sharedProvider);
           }
           if (sharedProvider.dropOffCoordenates != null &&
-              !selectingPickUpOrDropOff) {
+              !sharedProvider.selectingPickUpOrDropOff) {
             sharedProvider.dropOffLocation =
                 await MapServices.getReadableAddress(
                     sharedProvider.dropOffCoordenates!.latitude,
                     sharedProvider.dropOffCoordenates!.longitude,
                     apiKey);
-            addMarkerToMap(sharedProvider.dropOffCoordenates!);
+            addPickUpOrDropOffMarkerToMap(sharedProvider.dropOffCoordenates!,sharedProvider);
           }
         }
       },
@@ -224,46 +215,43 @@ class MapViewModel extends ChangeNotifier {
   }
 
   // Function to add a marker on map (CALLED BY: MapPage page and SelectDestination page)
-  void addMarkerToMap(LatLng position) {
+  void addPickUpOrDropOffMarkerToMap(LatLng position, SharedProvider sharedProvider) {
     //clean markers
-    if (selectingPickUpOrDropOff) {
-      markers.removeWhere(
+    if (sharedProvider.selectingPickUpOrDropOff) {
+      sharedProvider.markers.removeWhere(
         (element) => element.markerId == const MarkerId("pick_up"),
       );
     } else {
-      markers.removeWhere(
+     sharedProvider.markers.removeWhere(
         (element) => element.markerId == const MarkerId("drop_off"),
       );
     }
     //add marker
-    markers.add(
+    sharedProvider.markers.add(
       Marker(
-        markerId: MarkerId(selectingPickUpOrDropOff ? "pick_up" : "drop_off"),
+        markerId: MarkerId(sharedProvider.selectingPickUpOrDropOff ? "pick_up" : "drop_off"),
         position: position,
         infoWindow: const InfoWindow(
           title: 'Marker Title',
           snippet: 'Marker Snippet',
         ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(selectingPickUpOrDropOff
+        icon: BitmapDescriptor.defaultMarkerWithHue(sharedProvider.selectingPickUpOrDropOff
             ? BitmapDescriptor.hueRed
             : BitmapDescriptor.hueGreen),
       ),
     );
-    logger.i(
-        "Markers lenght: ${markers.length} entered in select lcoation mode $enteredInSelectingLocationMode");
   }
 
   //Draw route
   Future<void> drawRouteBetweenTwoPoints(SharedProvider sharedProvider) async {
     loading = true;
-    sharedProvider.polylines.clear();
     if (sharedProvider.pickUpCoordenates == null ||
         sharedProvider.dropOffCoordenates == null) {
       logger.e(
           "Valores nuloa al dibujar rutas: pick up coords: ${sharedProvider.pickUpCoordenates} , dropoff coords: ${sharedProvider.dropOffCoordenates}");
       return;
     }
-    RouteInfo? routeInfo = await MapServices.getRoutePolylinePoints(
+    RouteInfo? routeInfo = await SharedService.getRoutePolylinePoints(
         sharedProvider.pickUpCoordenates!,
         sharedProvider.dropOffCoordenates!,
         apiKey);
@@ -276,10 +264,8 @@ class MapViewModel extends ChangeNotifier {
         color: Colors.blue,
       );
       sharedProvider.duration = routeInfo.duration;
-      logger.i(
-          "Route drawn from ${sharedProvider.pickUpLocation} to ${sharedProvider.dropOffLocation} polyline enpty?: ${sharedProvider.polylineFromPickUpToDropOff.points.isEmpty}");
-    }
-    sharedProvider.polylines.add(sharedProvider.polylineFromPickUpToDropOff);
+  }
+
     loading = false;
   }
 
@@ -336,13 +322,13 @@ class MapViewModel extends ChangeNotifier {
         sharedProvider.pickUpCoordenates = response;
         //Pending: Add a Marker to that point
         sharedProvider.pickUpLocation = pickUpTextController.text;
-        addMarkerToMap(sharedProvider.pickUpCoordenates!);
+        addPickUpOrDropOffMarkerToMap(sharedProvider.pickUpCoordenates!,sharedProvider);
       }
       if (isDropOffFocussed) {
         sharedProvider.dropOffCoordenates = response;
         //Pending: Add a Marker to that point
         sharedProvider.dropOffLocation = dropOffTextController.text;
-        addMarkerToMap(sharedProvider.dropOffCoordenates!);
+        addPickUpOrDropOffMarkerToMap(sharedProvider.dropOffCoordenates!,sharedProvider);
       }
     }
     if (sharedProvider.pickUpCoordenates != null &&
@@ -372,11 +358,11 @@ class MapViewModel extends ChangeNotifier {
 
     pickUpFocusNode.addListener(() {
       isPickUpFocussed = pickUpFocusNode.hasFocus;
-      selectingPickUpOrDropOff = true;
+     sharedProvider. selectingPickUpOrDropOff = true;
     });
     dropOffFocusNode.addListener(() {
       isDropOffFocussed = dropOffFocusNode.hasFocus;
-      selectingPickUpOrDropOff = false;
+      sharedProvider.selectingPickUpOrDropOff = false;
     });
     //FocusTextFields
 

@@ -7,6 +7,7 @@ import 'package:passenger_app/features/auth/viewmodel/passenger_viewmodel.dart';
 import 'package:passenger_app/features/home/viewmodel/home_view_model.dart';
 import 'package:passenger_app/features/map/viewmodel/map_view_model.dart';
 import 'package:passenger_app/features/profile/viewmodel/profile_viewmodel.dart';
+import 'package:passenger_app/features/request_delivery/viewmodel/delivery_request_viewmodel.dart';
 import 'package:passenger_app/features/request_driver/viewmodel/request_driver_viewmodel.dart';
 import 'package:passenger_app/firebase_options.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
@@ -35,6 +36,9 @@ void main() async {
       ),
       ChangeNotifierProvider(
         create: (context) => RequestDriverViewModel(),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => DeliveryRequestViewModel(),
       ),
     ],
     child: const MyApp(),

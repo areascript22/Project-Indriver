@@ -1,16 +1,39 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:passenger_app/features/request_driver/model/ride_location.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:logger/logger.dart';
 import 'package:passenger_app/features/request_driver/repositorie/request_driver_service.dart';
+import 'package:passenger_app/features/request_driver/view/widgets/driver_arrived_bottom_sheet.dart';
+import 'package:passenger_app/features/request_driver/view/widgets/star_ratings_bottom_sheet.dart';
+import 'package:passenger_app/shared/models/driver_model.dart';
+import 'package:passenger_app/shared/models/route_info.dart';
+import 'package:passenger_app/shared/providers/shared_provider.dart';
+import 'package:passenger_app/shared/repositories/shared_service.dart';
 import 'package:passenger_app/shared/widgets/loading_overlay.dart';
 
 class RequestDriverViewModel extends ChangeNotifier {
+  final Logger logger = Logger();
+  final String apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
+  //listeners
+  StreamSubscription<DatabaseEvent>? driverStatusListener;
+  StreamSubscription<DatabaseEvent>? driverPositionListener;
+
   //GETTERS
 
   //SETTERS
 
+  //Cancel listeners
+  void cancelDriverListeners() {
+    driverStatusListener?.cancel();
+    driverPositionListener?.cancel();
+  }
+
   //Request Driver
-  void requestTaxi(BuildContext context) async {
+  void requestTaxi(BuildContext context, SharedProvider sharedProvider) async {
     //Display the overlay
     OverlayEntry? overlayEntry;
     final overlay = Overlay.of(context);
@@ -20,36 +43,172 @@ class RequestDriverViewModel extends ChangeNotifier {
     overlay.insert(overlayEntry);
 
     User? user = FirebaseAuth.instance.currentUser;
-    RideLocation? rideLocation;
-    if (user != null) {
-      rideLocation = RideLocation(
-        clientId: user.uid,
-        pickUpCoordinates: "",
-        dropOffCoordinates: "",
-        pickUpLocation: "",
-        destinationLocation: "",
-        destinationReference: "",
-        status: "pending",
-        distance: "",
-        duration: "",
-      );
+    if (user == null) {
+      logger.e("Error, user not authenticated");
+      overlayEntry.remove();
+      return;
     }
 
     //GEt First Driver in Queue
     String? firstDriverKey =
         await RequestDriverService.getFirstDriverKeyOrderedByTimestamp();
-    Map<String, dynamic>? driverInfo;
+    DriverModel? driverInfo;
+    bool passengerNodeUpdated = false;
     if (firstDriverKey != null) {
       driverInfo =
-          await RequestDriverService.getDriverInformationById(firstDriverKey);
-    }
-    if (driverInfo != null) {
-      await RequestDriverService.updatePassengerNode(
-          firstDriverKey!, rideLocation!);
+          await SharedService .getDriverInformationById(firstDriverKey);
+
+      passengerNodeUpdated = await RequestDriverService.updatePassengerNode(
+          firstDriverKey, sharedProvider);
     }
 
+    //Move to Operation mode
+    if (passengerNodeUpdated && driverInfo != null) {
+      sharedProvider.driverModel = driverInfo;
+      _listenToDriverStatus(driverInfo.id, sharedProvider);
+      _listenToDriverCoordenates(driverInfo.id, sharedProvider);
+    }
     //Remove overlay when it's all comleted
     overlayEntry.remove();
-    overlayEntry = null;
+  }
+
+  //LISTENER: To update TaxiMarker based on driver coordinates
+  void _listenToDriverCoordenates(
+      String driverId, SharedProvider sharedProvider) {
+    Logger logger = Logger();
+    final databaseRef =
+        FirebaseDatabase.instance.ref('drivers/$driverId/location');
+
+    try {
+      driverPositionListener = databaseRef.onValue.listen((event) async {
+        //Check if there is any data
+        if (event.snapshot.exists) {
+          //get coordinates
+          final coords = event.snapshot.value as Map;
+          final LatLng driverCoords = LatLng(
+              coords['latitude'].toDouble(), coords['longitude'].toDouble());
+
+          //Update Driver marker
+          sharedProvider.driverMarker = Marker(
+              markerId: const MarkerId("marker_id"),
+              icon: sharedProvider.driverIcon ?? BitmapDescriptor.defaultMarker,
+              position: driverCoords);
+          //Update Polyline (Route from Driver to pick up point)
+          LatLng destination = sharedProvider.pickUpCoordenates!;
+          if (sharedProvider.driverStatus == DriverRideStatus.goingToDropOff) {
+            destination = sharedProvider.dropOffCoordenates!;
+          }
+
+          RouteInfo? routeInfo = await SharedService.getRoutePolylinePoints(
+              driverCoords, destination, apiKey);
+
+          if (routeInfo != null) {
+            sharedProvider.polylineFromPickUpToDropOff = Polyline(
+              polylineId: const PolylineId("pickUpToDropoff"),
+              points: routeInfo.polylinePoints,
+              width: 5,
+              color: Colors.blue,
+            );
+          }
+        }
+      });
+    } catch (e) {
+      logger.e('Error listening to driver coordinates: $e');
+    }
+  }
+
+  //LISTENER: To listen every status of the driver
+  void _listenToDriverStatus(String driverId, SharedProvider sharedProvider) {
+    final Logger logger = Logger();
+    final databaseRef =
+        FirebaseDatabase.instance.ref('drivers/$driverId/status');
+
+    try {
+      driverStatusListener = databaseRef.onValue.listen((DatabaseEvent event) {
+        // Check if the snapshot has data
+        if (event.snapshot.exists) {
+          // Get the status value
+          final status = event.snapshot.value as String;
+          logger.i("Driver Status changed to: ${status}");
+          switch (status) {
+            case DriverRideStatus.goingToPickUp:
+              sharedProvider.driverStatus = DriverRideStatus.goingToPickUp;
+              break;
+            case DriverRideStatus.arrived:
+              sharedProvider.driverStatus = DriverRideStatus.arrived;
+              //Show Bottom Sheet
+              if (sharedProvider.mapPageContext != null) {
+                showDriverArrivedBotttomSheet(sharedProvider.mapPageContext!);
+              }
+              break;
+            case DriverRideStatus.goingToDropOff:
+              sharedProvider.driverStatus = DriverRideStatus.goingToDropOff;
+              break;
+            case DriverRideStatus.finished:
+              sharedProvider.driverStatus = DriverRideStatus.finished;
+              //Rate the driver
+              showStarRatingsBottomSheet(sharedProvider.mapPageContext!,
+                  sharedProvider.driverModel!.id);
+              //Return to normal state of the appp
+              sharedProvider.driverModel = null;
+              sharedProvider.dropOffCoordenates = null;
+              sharedProvider.dropOffLocation = null;
+              sharedProvider.pickUpCoordenates = null;
+              sharedProvider.pickUpLocation = null;
+              sharedProvider.selectingPickUpOrDropOff = true;
+              sharedProvider.duration = null;
+              sharedProvider.markers.clear();
+              sharedProvider.polylineFromPickUpToDropOff.points.clear();
+              cancelDriverListeners();
+
+              break;
+            default:
+              logger.e("Driver Status not found..");
+              break;
+          }
+        } else {
+          logger.i('Driver $driverId status does not exist.');
+        }
+      });
+    } catch (e) {
+      logger.e('Error listening to driver status: $e');
+    }
+  }
+
+  //CALLED BY DriverArrivedBottomSheet widget
+  void updateDriverStatus(
+      String driverId, String status, BuildContext context) async {
+    //
+    //Display the overlay
+
+    final overlay = Overlay.of(context);
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => const LoadingOverlay(),
+    );
+    overlay.insert(overlayEntry);
+
+    //Update Driver Status
+    await RequestDriverService.updateDriverStatus(driverId, status);
+    //Remove overlay when it's all comleted
+    overlayEntry.remove();
+    if (context.mounted) {
+      Navigator.pop(context);
+    }
+  }
+
+  void updateDriverStarRatings(
+      double newRating, String driverId, BuildContext context) async {
+    final overlay = Overlay.of(context);
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => const LoadingOverlay(),
+    );
+    overlay.insert(overlayEntry);
+    //Update star rating
+    await RequestDriverService.updateDriverStarRatings(newRating, driverId);
+
+    overlayEntry.remove();
+    if (context.mounted) {
+      Navigator.pop(context);
+    }
   }
 }

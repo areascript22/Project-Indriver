@@ -5,7 +5,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/web.dart';
-import 'package:passenger_app/features/map/model/route_info.dart';
+import 'package:passenger_app/shared/models/route_info.dart';
 import 'package:uuid/uuid.dart';
 
 class MapServices {

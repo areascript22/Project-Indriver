@@ -1,15 +1,12 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:logger/logger.dart';
-import 'package:passenger_app/features/request_driver/view/widgets/bs_elevated_button.dart';
+import 'package:passenger_app/shared/widgets/bs_elevated_button.dart';
 import 'package:passenger_app/features/request_driver/view/widgets/bs_text_field.dart';
-import 'package:passenger_app/features/request_driver/view/widgets/custom_image_button.dart';
+import 'package:passenger_app/shared/widgets/custom_image_button.dart';
 import 'package:passenger_app/features/request_driver/viewmodel/request_driver_viewmodel.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
 import 'package:passenger_app/shared/widgets/custom_circular_button.dart';
-import 'package:passenger_app/features/request_driver/view/widgets/search_locations_bottom_sheet.dart';
+import 'package:passenger_app/shared/widgets/search_locations_bottom_sheet.dart';
 import 'package:passenger_app/shared/widgets/custom_elevated_button.dart';
 import 'package:provider/provider.dart';
 
@@ -167,7 +164,7 @@ class _RequestDriverBottomSheetState extends State<RequestDriverBottomSheet> {
                   CustomElevatedButton(
                     onTap: sharedViewModel
                             .polylineFromPickUpToDropOff.points.isNotEmpty
-                        ? () => requestDriverViewModel.requestTaxi(context)
+                        ? () => requestDriverViewModel.requestTaxi(context,sharedViewModel)
                         : null,
                     child: const Text("Solicitar taxi"),
                   ),

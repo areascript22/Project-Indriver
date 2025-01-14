@@ -46,6 +46,11 @@ dependencies:
   location: ^6.0.2
   google_maps_flutter: ^2.6.1
   flutter_dotenv: ^5.2.1
+  flutter_polyline_points: ^2.0.0
+  flutter_rating_bar: ^4.0.1
+  map_launcher: ^3.5.0
+  flutter_svg: ^2.0.10+1
+  image: ^3.0.1
 
 dev_dependencies:
   flutter_test:

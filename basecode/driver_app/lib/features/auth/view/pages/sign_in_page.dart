@@ -101,6 +101,9 @@ class _SignInPageState extends State<SignInPage> {
                         logger.i("Email just verified....");
                       }
                     } else {
+                      setState(() {
+                      isLoading = false;
+                    });
                       //Toast
 
                       if (context.mounted) {
@@ -109,9 +112,7 @@ class _SignInPageState extends State<SignInPage> {
                                 content: Text("Usuario no registrado")));
                       }
                     }
-                    setState(() {
-                      isLoading = false;
-                    });
+                    
                   }
                 },
               ),

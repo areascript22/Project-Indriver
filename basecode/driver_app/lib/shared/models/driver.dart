@@ -1,5 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+class DriverRideStatus {
+  static const String pending = 'pending';
+  static const String goingToPickUp = 'goingToPickUp';
+  static const String arrived = 'arrived';
+  static const String goingToDropOff = 'goingToDropOff';
+  static const String finished = 'finished';
+}
+
 class Driver {
   final String id;
   final String name;
@@ -33,8 +41,6 @@ class Driver {
         role: doc['role'],
         vehicle: Vehicle.fromMap(doc['vehicle']),
       );
-
-
 }
 
 class Ratings {

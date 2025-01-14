@@ -38,27 +38,38 @@ class _PassengerAppState extends State<PassengerApp> {
   @override
   Widget build(BuildContext context) {
     final homeViewModel = Provider.of<HomeViewModel>(context);
+    final sharedProvider = Provider.of<SharedProvider>(context);
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text("Passenger app"),
-      //   bottom: PreferredSize(
-      //     preferredSize:
-      //         const Size.fromHeight(1.0), // Thin line with shadow height
-      //     child: Container(
-      //       height: 2.0, // Line thickness
-      //       decoration: BoxDecoration(
-      //         color: Colors.grey[300], // Line color (light gray)
-      //         boxShadow: [
-      //           BoxShadow(
-      //             color: Colors.black.withOpacity(0.1),
-      //             blurRadius: 1,
-      //             offset: const Offset(0, 1.5),
-      //           ),
-      //         ],
-      //       ),
-      //     ),
-      //   ),
-      // ),
+      appBar: AppBar(
+        actions: [
+          if (sharedProvider.deliveryLookingForDriver)
+            TextButton(
+                onPressed: () {
+                  sharedProvider.deliveryLookingForDriver = false;
+                },
+                child: Text(
+                  "Cancelar",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                )),
+        ],
+        // bottom: PreferredSize(
+        //   preferredSize:
+        //       const Size.fromHeight(1.0), // Thin line with shadow height
+        //   child: Container(
+        //     height: 2.0, // Line thickness
+        //     decoration: BoxDecoration(
+        //       color: Colors.grey[300], // Line color (light gray)
+        //       boxShadow: [
+        //         BoxShadow(
+        //           color: Colors.black.withOpacity(0.1),
+        //           blurRadius: 1,
+        //           offset: const Offset(0, 1.5),
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+        // ),
+      ),
       drawer: const CustomDrawer(),
       body: Stack(
         children: [

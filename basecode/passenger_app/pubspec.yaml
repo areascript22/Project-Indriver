@@ -54,6 +54,9 @@ dependencies:
   speech_to_text: ^6.6.0
   flutter_polyline_points: ^2.0.0
   uuid: ^4.4.2
+  url_launcher: ^6.3.0
+  flutter_rating_bar: ^4.0.1
+  flutter_stripe: ^11.3.0
 
 dev_dependencies:
   flutter_test:
