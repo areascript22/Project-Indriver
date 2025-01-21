@@ -27,7 +27,7 @@ class _RequestDeliveryBottomSheetState
   int selectedIndex = 0; // Tracks the currently selected button index
   final List<Map> imagePaths = [
     {'path': 'assets/img/delivery.png', 'title': 'Encomiendas'},
-    {'path': 'assets/img/car.png', 'title': 'Viajes'},
+    {'path': 'assets/img/car.png', 'title': 'Carreras'},
   ];
   bool showEncompleteFieldError = false;
 

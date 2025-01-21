@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:passenger_app/features/home/view/widgets/custom_drawer.dart';
+import 'package:logger/logger.dart';
+import 'package:passenger_app/shared/widgets/custom_drawer.dart';
 import 'package:passenger_app/features/map/view/widgets/circular_button.dart';
 import 'package:passenger_app/features/request_driver/view/pages/driver_bottom_card.dart';
 import 'package:passenger_app/features/request_delivery/view/pages/request_delivery_bottom_sheet.dart';
@@ -19,9 +20,12 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
+  final GlobalKey<ScaffoldState> scaffoldkey = GlobalKey<ScaffoldState>();
+  final logger = Logger();
   @override
   void initState() {
     super.initState();
+    logger.f("Initizlizing Map Page");
     //Adign A value to our
     initializeNeccesaryData();
   }
@@ -39,6 +43,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
     final sharedProvider = Provider.of<SharedProvider>(context);
     sharedProvider.mapPageContext = context;
     return Scaffold(
+      key: scaffoldkey,
       drawer: const CustomDrawer(),
       body: Stack(
         alignment: Alignment.center,
@@ -68,7 +73,6 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
               if (mapViewModel.enteredInSelectingLocationMode ||
                   (!mapViewModel.enteredInSelectingLocationMode &&
                       sharedProvider.dropOffCoordenates == null)) {
-                print("updating");
                 if (sharedProvider.selectingPickUpOrDropOff) {
                   sharedProvider.pickUpCoordenates = position.target;
                 } else {
@@ -100,16 +104,30 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                               color: Colors.blue,
                             ),
             ),
-          //Menu Icon
-          // if (!mapViewModel.enteredInSelectingLocationMode)
-          //   Positioned(
-          //     top: 40,
-          //     left: 20,
-          //     child: CircularButton(
-          //       onPressed: () {},
-          //       icon: const Icon(Icons.menu),
-          //     ),
-          //   ),
+          //     Menu Icon
+          if (!mapViewModel.enteredInSelectingLocationMode)
+            Positioned(
+              top: 10,
+              left: 15,
+              child: CircularButton(
+                onPressed: () => scaffoldkey.currentState?.openDrawer(),
+                icon: const Icon(Icons.menu),
+              ),
+            ),
+
+          //Go to current location button
+          Positioned(
+            top: 10,
+            right: 10,
+            child: CircularButton(
+              onPressed: () {
+                // mapViewModel
+                //     .animateCameraToPosition(LatLng(-1.663946, -78.672757));
+                mapViewModel.getCurrentLocationAndNavigate();
+              },
+              icon: const Icon(Icons.navigation_rounded),
+            ),
+          ),
 
           //Return to Select Pick Up
           if (mapViewModel.enteredInSelectingLocationMode)

@@ -16,6 +16,7 @@ class SharedProvider extends ChangeNotifier {
   String _driverStatus = ''; //To Track ride status
   String _deliveryStatus = ''; //To track delivery status
   LatLng? _driverCurrentCoordenates;
+  LatLng? passengerCurrentCoords;
   BitmapDescriptor? driverIcon;
   Marker _driverMarker = const Marker(markerId: MarkerId("taxi_marker"));
 
@@ -34,6 +35,9 @@ class SharedProvider extends ChangeNotifier {
       true; //True:selectin pick up location, else DropOff
   bool _deliveryLookingForDriver = false;
 
+  //PAyments
+  int _paymentMethodIndex = 0; //Cash by defoult
+
   //GETTERS
   DriverModel? get driverModel => _driverModel;
   String get driverStatus => _driverStatus;
@@ -51,6 +55,7 @@ class SharedProvider extends ChangeNotifier {
   bool get requestDriverOrDelivery => _requestDriverOrDelivery;
   bool get selectingPickUpOrDropOff => _selectingPickUpOrDropOff;
   bool get deliveryLookingForDriver => _deliveryLookingForDriver;
+  int get paymentMethodIndex => _paymentMethodIndex;
 
   //SETTTERS
   set driverModel(DriverModel? value) {
@@ -125,6 +130,11 @@ class SharedProvider extends ChangeNotifier {
 
   set deliveryLookingForDriver(bool value) {
     _deliveryLookingForDriver = value;
+    notifyListeners();
+  }
+
+  set paymentMethodIndex(int value) {
+    _paymentMethodIndex = value;
     notifyListeners();
   }
 

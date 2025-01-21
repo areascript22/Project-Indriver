@@ -27,11 +27,30 @@ class RequestDriverService {
     }
   }
 
-  
+  //get all available drivers in the map
+  static Future<List<Map<String, dynamic>>> fetchAvailableDrivers() async {
+    // final logger = Logger();
+    DatabaseReference driversRef = FirebaseDatabase.instance.ref('drivers');
+    final snapshot =
+        await driversRef.orderByChild('status').equalTo('pending').get();
+
+    if (snapshot.exists) {
+      return (snapshot.value as Map<dynamic, dynamic>).entries.map((entry) {
+        final driverData = entry.value as Map<dynamic, dynamic>;
+        final driverCoordinates = driverData['location'];
+        return {
+          'driverID': entry.key,
+          'latitude': driverCoordinates['latitude'],
+          'longitude': driverCoordinates['longitude'],
+        };
+      }).toList();
+    }
+    return [];
+  }
 
   //Add request data under "drivers/key" node
-  static Future<bool> updatePassengerNode(
-      String driverId,SharedProvider sharedProvider) async {
+  static Future<bool> updatePassengerNode(String driverId,
+      SharedProvider sharedProvider, String requestType) async {
     final Logger logger = Logger();
     try {
       // Reference to the main node (e.g., a driver ID or any other node ID)
@@ -42,21 +61,24 @@ class RequestDriverService {
       await mainNodeRef.child('passenger').set({
         'passengerId': sharedProvider.passengerModel!.id,
         'status': "pending",
+        'type': requestType,
         'information': {
-            'name': sharedProvider.passengerModel!.name,
-            'phone':sharedProvider.passengerModel!.phone,
-            'profilePicture':sharedProvider.passengerModel!.profilePicture,
-            'pickUpLocation': sharedProvider.pickUpLocation,
-            'dropOffLocation': sharedProvider.dropOffLocation,
-            "pickUpCoordenates": {
-              "latitude": sharedProvider.pickUpCoordenates!.latitude,
-              "longitude": sharedProvider.pickUpCoordenates!.longitude, 
-            },
-            "dropOffCoordenates": {
-              "latitude": sharedProvider.dropOffCoordenates!.latitude,
-              "longitude": sharedProvider.dropOffCoordenates!.longitude,
-            },
+          'audioFilePath': '', //In case it is 'byRecordedAudio' type
+          'indicationText': '', //In case it is 'byTexting' type
+          'name': sharedProvider.passengerModel!.name,
+          'phone': sharedProvider.passengerModel!.phone,
+          'profilePicture': sharedProvider.passengerModel!.profilePicture,
+          'pickUpLocation': sharedProvider.pickUpLocation ?? '',
+          'dropOffLocation': sharedProvider.dropOffLocation ?? '',
+          "pickUpCoordenates": {
+            "latitude": sharedProvider.pickUpCoordenates?.latitude,
+            "longitude": sharedProvider.pickUpCoordenates?.longitude,
           },
+          "dropOffCoordenates": {
+            "latitude": sharedProvider.dropOffCoordenates?.latitude,
+            "longitude": sharedProvider.dropOffCoordenates?.longitude,
+          },
+        },
       });
 
       logger.i("Passenger node updated successfully.");

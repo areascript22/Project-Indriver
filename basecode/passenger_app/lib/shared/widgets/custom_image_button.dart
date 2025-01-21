@@ -19,8 +19,8 @@ class CustomImageButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 60,
-        width: 110,
+        height: 40,
+        width: 100,
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(10)),
           color: isSelected ? Colors.blue[100] : Colors.transparent,
@@ -33,7 +33,7 @@ class CustomImageButton extends StatelessWidget {
               top: -3,
               child: Image.asset(
                 imagePath,
-                height: 60,
+                height: 35,
                 fit: BoxFit.cover,
               ),
             ),

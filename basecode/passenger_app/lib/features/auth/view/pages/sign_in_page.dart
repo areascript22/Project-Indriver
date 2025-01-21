@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:passenger_app/core/utils/dialog_util.dart';
+import 'package:passenger_app/core/utils/toast_message_util.dart';
 import 'package:passenger_app/features/auth/view/pages/verification_page.dart';
 import 'package:passenger_app/shared/widgets/custom_elevated_button.dart';
 import 'package:passenger_app/features/auth/view/widgets/phone_number_field.dart';
@@ -42,16 +43,15 @@ class _SignInPageState extends State<SignInPage> {
       setState(() {
         isloading = true;
       });
-      await FirebaseAuth.instance.verifyPhoneNumber(
+      await FirebaseAuth.instance
+          .verifyPhoneNumber(
         timeout: const Duration(seconds: 60),
         phoneNumber: "+593${textController.text}",
         verificationCompleted: (phoneAuthCredential) {},
         verificationFailed: (error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    'Error al enviar código de verificación: ${error.toString()}')),
-          );
+          ToastMessageUtil.showToast(
+              "Tiempo de espera de red agotado. Por favor intente de nuevo.");
+
           _logger.i(error.toString());
           isloading = false;
           setState(() {});
@@ -66,13 +66,18 @@ class _SignInPageState extends State<SignInPage> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const  VerificationPage(
-            
-                ),
+                builder: (context) => const VerificationPage(),
               ));
         },
         codeAutoRetrievalTimeout: (verificationId) {
           _logger.i("Auto Retrieval Timeout.. $verificationId");
+        },
+      )
+          .timeout(
+        const Duration(seconds: 7),
+        onTimeout: () {
+          ToastMessageUtil.showToast(
+              "Tiempo de espera de red agotado. Por favor intente de nuevo.");
         },
       );
     }

@@ -1,11 +1,11 @@
-import 'package:driver_app/features/ride_request/view/widgets/driver_position_dialog.dart';
+import 'package:driver_app/features/ride_request/view/widgets/driver_queue.dart';
 import 'package:driver_app/features/ride_request/view/widgets/passenger_info_card.dart';
 import 'package:driver_app/features/ride_request/viewmodel/ride_request_viewmodel.dart';
-import 'package:driver_app/shared/models/driver.dart';
 import 'package:driver_app/shared/providers/shared_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 class RideMRequestPage extends StatefulWidget {
@@ -16,6 +16,7 @@ class RideMRequestPage extends StatefulWidget {
 }
 
 class _RideMRequestPageState extends State<RideMRequestPage> {
+  final logger = Logger();
   late RideRequestViewModel providerToDispose;
   @override
   void initState() {
@@ -64,36 +65,35 @@ class _RideMRequestPageState extends State<RideMRequestPage> {
           ),
           //Button
           //BUTTON: Select Position Taxi
-          if (rideRequestViewModel.driverRideStatus == DriverRideStatus.pending)
-            Positioned(
-              top: 5,
-              right: 80,
-              child: ElevatedButton(
-                onPressed: () async {
-                  //Navigate to current location
-                  showDialog(
-                    context: context,
-                    builder: (context) => DriverPositionsDialog(),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(10),
-                  backgroundColor: Colors.blue,
-                ),
-                child: rideRequestViewModel.currenQueuePoosition == null
-                    ? const Icon(
-                        Ionicons.add,
-                        color: Colors.white,
-                        size: 30,
-                      )
-                    : Text(
-                        rideRequestViewModel.currenQueuePoosition.toString()),
+          //  if (rideRequestViewModel.driverRideStatus == DriverRideStatus.pending)
+          Positioned(
+            top: 5,
+            right: 80,
+            child: ElevatedButton(
+              onPressed: () async {
+                int? response = await showDriverQueueDialog(context);
+                if (response != null) {
+                  rideRequestViewModel.currenQueuePoosition = response;
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(10),
+                backgroundColor: Colors.blue,
               ),
+              child: rideRequestViewModel.currenQueuePoosition == null
+                  ? const Icon(
+                      Ionicons.add,
+                      color: Colors.white,
+                      size: 30,
+                    )
+                  : Text(rideRequestViewModel.currenQueuePoosition.toString()),
             ),
+          ),
 
           //Passenger Info Card
-          Positioned(bottom: 0, left: 0, right: 0, child: PassengerInfoCard()),
+          const Positioned(
+              bottom: 0, left: 0, right: 0, child: PassengerInfoCard()),
         ],
       ),
     );

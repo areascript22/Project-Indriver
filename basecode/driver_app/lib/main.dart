@@ -32,7 +32,7 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (context) => DeliveryRequestViewModel(),
-        ), 
+        ),
       ],
       child: const MyApp(),
     ),

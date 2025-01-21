@@ -274,4 +274,42 @@ class RideRequestViewModel extends ChangeNotifier {
     currenQueuePoosition = null;
     myPosition = null;
   }
+
+  //Book position in queue
+  Future<void> bookPositionInQueue() async {
+    final String? driverId = FirebaseAuth.instance.currentUser?.uid;
+    if (driverId == null) {
+      logger.e("User not atuthenticated");
+      return;
+    }
+    driverInQueue =
+        await RideRequestService.bookDriverPositionInQueue(idUsuario: driverId);
+  }
+
+//Stream to get drivers ordered bassed on timestamp field
+  Stream<int?> getDriverPositionInQueue() {
+    final String? driverId = FirebaseAuth.instance.currentUser?.uid;
+    if (driverId == null) {
+      logger.e("User not atuthenticated");
+      return const Stream.empty();
+    }
+    final DatabaseReference driversRef =
+        FirebaseDatabase.instance.ref('positions');
+    return driversRef.orderByChild('timestamp').onValue.map((event) {
+      final drivers = event.snapshot.value as Map?;
+      // logger.f("Data fetchedL: $drivers");
+      if (drivers != null) {
+        final sortedDrivers = drivers.entries.toList()
+          ..sort((a, b) => (a.value['timestamp'] as int)
+              .compareTo(b.value['timestamp'] as int));
+        //  logger.f("Sorted drivers: $sortedDrivers");
+        for (int i = 0; i < sortedDrivers.length; i++) {
+          if (sortedDrivers[i].key == driverId) {
+            return i + 1; // Return the position (1-based index)
+          }
+        }
+      }
+      return null; // Return null if the driver is not in the queue
+    });
+  }
 }

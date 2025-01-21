@@ -4,8 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 import 'package:logger/logger.dart';
+import 'package:passenger_app/core/utils/toast_message_util.dart';
 import 'package:passenger_app/features/request_driver/repositorie/request_driver_service.dart';
 import 'package:passenger_app/features/request_driver/view/widgets/driver_arrived_bottom_sheet.dart';
 import 'package:passenger_app/features/request_driver/view/widgets/star_ratings_bottom_sheet.dart';
@@ -33,7 +36,8 @@ class RequestDriverViewModel extends ChangeNotifier {
   }
 
   //Request Driver
-  void requestTaxi(BuildContext context, SharedProvider sharedProvider) async {
+  void requestTaxi(BuildContext context, SharedProvider sharedProvider,
+      String requestType) async {
     //Display the overlay
     OverlayEntry? overlayEntry;
     final overlay = Overlay.of(context);
@@ -49,17 +53,36 @@ class RequestDriverViewModel extends ChangeNotifier {
       return;
     }
 
+    String? driverId;
     //GEt First Driver in Queue
     String? firstDriverKey =
         await RequestDriverService.getFirstDriverKeyOrderedByTimestamp();
+
     DriverModel? driverInfo;
     bool passengerNodeUpdated = false;
     if (firstDriverKey != null) {
-      driverInfo =
-          await SharedService .getDriverInformationById(firstDriverKey);
-
+      driverId = firstDriverKey;
+      //There are drivers in queue
+      driverInfo = await SharedService.getDriverInformationById(firstDriverKey);
       passengerNodeUpdated = await RequestDriverService.updatePassengerNode(
-          firstDriverKey, sharedProvider);
+          firstDriverKey, sharedProvider, requestType);
+    } else {
+      //There are not any drivers in Queue
+      Map<String, dynamic>? nearestDriver =
+          await _findNearestDriver(sharedProvider.passengerCurrentCoords!);
+      if (nearestDriver != null) {
+        //We find a driver available in the map
+        String nearestDriverId = nearestDriver['driverID'];
+        driverInfo =
+            await SharedService.getDriverInformationById(nearestDriverId);
+        passengerNodeUpdated = await RequestDriverService.updatePassengerNode(
+            nearestDriverId, sharedProvider, requestType);
+      } else {
+        //There is not driver available in the map
+        //Pass to Reqeusts queue
+      }
+
+      ToastMessageUtil.showToast("Sin vehículos disponibles.");
     }
 
     //Move to Operation mode
@@ -70,6 +93,38 @@ class RequestDriverViewModel extends ChangeNotifier {
     }
     //Remove overlay when it's all comleted
     overlayEntry.remove();
+  }
+
+  //get the nearest driver
+  Future<Map<String, dynamic>?> _findNearestDriver(LatLng userLocation) async {
+    final drivers = await RequestDriverService.fetchAvailableDrivers();
+    if (drivers.isEmpty) return null;
+
+    Map<String, dynamic>? nearestDriver;
+    double minDistance = double.infinity;
+
+    for (var driver in drivers) {
+      double distance = _calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        driver['latitude'],
+        driver['longitude'],
+      );
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestDriver = driver;
+      }
+    }
+
+    return nearestDriver;
+  }
+
+//HELPER: To calculate the distance between two coordinates
+  double _calculateDistance(
+      double startLat, double startLng, double endLat, double endLng) {
+    return Geolocator.distanceBetween(
+        startLat, startLng, endLat, endLng); // Distance in meters
   }
 
   //LISTENER: To update TaxiMarker based on driver coordinates

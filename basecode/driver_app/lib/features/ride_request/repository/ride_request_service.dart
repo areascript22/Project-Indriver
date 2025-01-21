@@ -5,9 +5,8 @@ import 'package:logger/logger.dart';
 
 class RideRequestService {
   //To book position, driver is added to queue
-  static Future<void> bookDriverPositionInQueue({
+  static Future<bool> bookDriverPositionInQueue({
     required String idUsuario,
-    required bool status,
   }) async {
     final Logger logger = Logger();
     final DatabaseReference dbRef =
@@ -15,30 +14,15 @@ class RideRequestService {
 
     // Prepare the data to write
     final Map<String, dynamic> data = {
-      'Status': status,
-      'Timestamp': ServerValue.timestamp, // Add Firebase server timestamp
+      'timestamp': ServerValue.timestamp, // Add Firebase server timestamp
     };
-
-    // Set or update the data
-    await dbRef.set(data).then((_) {
-      logger.i('Data successfully updated for $idUsuario!');
-    }).catchError((error) {
-      logger.e('Failed to update data: $error');
-    });
-  }
-
-//Update "status" field under 'driver/driverId' node
-  static Future<void> updateDriverStatus(String driverId, String status) async {
-    final Logger logger = Logger();
     try {
-      final DatabaseReference databaseRef =
-          FirebaseDatabase.instance.ref('drivers/$driverId/status');
-      // Update the status
-      await databaseRef.set(status);
-      logger.i(
-          'Successfully updated driver status to :$status for driverId: $driverId');
+      await dbRef.set(data);
+      logger.i('Data successfully updated for $idUsuario!');
+      return true;
     } catch (e) {
-      logger.e('Failed to update driver status: $e');
+      logger.e('Failed to update data: $e');
+      return false;
     }
   }
 
@@ -58,6 +42,21 @@ class RideRequestService {
       logger.i('Position removed successfully for UID: $uid');
     } catch (e, stackTrace) {
       logger.e('Failed to remove position for UID: $uid, $e, $stackTrace');
+    }
+  }
+
+//Update "status" field under 'driver/driverId' node
+  static Future<void> updateDriverStatus(String driverId, String status) async {
+    final Logger logger = Logger();
+    try {
+      final DatabaseReference databaseRef =
+          FirebaseDatabase.instance.ref('drivers/$driverId/status');
+      // Update the status
+      await databaseRef.set(status);
+      logger.i(
+          'Successfully updated driver status to :$status for driverId: $driverId');
+    } catch (e) {
+      logger.e('Failed to update driver status: $e');
     }
   }
 

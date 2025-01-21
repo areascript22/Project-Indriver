@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class BSElevatedButton extends StatefulWidget {
   final Widget child;
   final bool pickUpDestination;
@@ -24,18 +23,13 @@ class BSElevatedButton extends StatefulWidget {
 class _BSElevatedButtonState extends State<BSElevatedButton> {
   @override
   Widget build(BuildContext context) {
-   // final testController = TextEditingController();
     return ElevatedButton(
       onPressed: widget.onPressed,
       style: ElevatedButton.styleFrom(
-        // backgroundColor: Theme.of(context).colorScheme.primary,
         backgroundColor: widget.backgroundColor,
-        // backgroundColor: Colors.transparent,
-        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
-        minimumSize: const Size(100, 55),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.max,
@@ -43,10 +37,6 @@ class _BSElevatedButtonState extends State<BSElevatedButton> {
           widget.icon,
           const SizedBox(width: 5.0),
           widget.child,
-          // Text(
-          //   widget.child,
-          //   style: Theme.of(context).textTheme.bodyLarge,
-          //  ),
         ],
       ),
     );

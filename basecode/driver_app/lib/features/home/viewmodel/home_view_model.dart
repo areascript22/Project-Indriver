@@ -17,12 +17,14 @@ class HomeViewModel extends ChangeNotifier {
   final Logger logger = Logger();
   lc.Location location = lc.Location();
 
+  //Permissions
   late StreamSubscription<ServiceStatus> serviceStatusSubscription;
   StreamSubscription<Position>? locationListener;
   bool _locationPermissionsSystemLevel =
       true; //Location services at System level
   bool _locationPermissionUserLevel = false; // Location services at User level
   bool _isCurrentLocationAvailable = true;
+
   int _currentPageIndex = 0;
   int _deliveryRequestLength = 0;
 
@@ -61,6 +63,35 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   //FUNCTIONS
+  //get issue bassed on priority
+  Map? getIssueBassedOnPriority() {
+    if (!locationPermissionUserLevel) {
+      return {
+        "priority": 0,
+        "color": Colors.red,
+        "title": "Permisos de ubicación desactivados.",
+        "content": "Click aquí para activarlos",
+      };
+    }
+    if (!locationPermissionsSystemLevel) {
+      return {
+        "priority": 1,
+        "color": Colors.orange,
+        "title": "Servicio de ubicación desactivados.",
+        "content": "Click aquí para activarlo.",
+      };
+    }
+    if (!isCurrentLocationAvailable) {
+      return {
+        "priority": 2,
+        "color": Colors.white70,
+        "title": "Te estamos buscando en el mapa.",
+        "content": "Sin señal GPS.",
+      };
+    }
+    return null;
+  }
+
   // To listen only Delivery request lenght
   void listenToRequests(DatabaseReference requestsRef) {
     requestsRef.onValue.listen((event) {
@@ -104,6 +135,7 @@ class HomeViewModel extends ChangeNotifier {
 
   // Function to start tracking location changes
   void startLocationTracking(SharedProvider sharedProvider) async {
+    isCurrentLocationAvailable = false;
     try {
       // Get the current location
       Position currentPosition = await Geolocator.getCurrentPosition(

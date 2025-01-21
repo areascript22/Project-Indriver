@@ -17,10 +17,18 @@ class CircularButton extends StatelessWidget {
             .colorScheme
             .background, // Set the background color
         shape: BoxShape.circle, // Optional: make it circular
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1), // Shadow color with opacity
+            blurRadius: 6, // Spread of the shadow
+            offset:
+                const Offset(0, 2), // Shadow position (horizontal, vertical)
+          ),
+        ],
       ),
       child: IconButton(
         icon: icon,
-        //   color: Colors.white, // Set the icon color
+        color: Colors.blue, // Set the icon color
         onPressed: onPressed,
       ),
     );

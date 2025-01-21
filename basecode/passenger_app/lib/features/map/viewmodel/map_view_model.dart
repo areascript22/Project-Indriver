@@ -1,7 +1,8 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
 import 'package:passenger_app/shared/models/route_info.dart';
@@ -11,7 +12,7 @@ import 'package:passenger_app/shared/providers/shared_provider.dart';
 import 'package:passenger_app/shared/repositories/shared_service.dart';
 
 class MapViewModel extends ChangeNotifier {
-  final String apiKey = "AIzaSyDm2_br4_go6Tf6QhVczmXnNHwuJYZUZDs";
+  final String apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
   bool _loading = false; //For showing a circular spineer while async funcs
   final Logger logger = Logger();
   late AnimationController animController;
@@ -30,7 +31,6 @@ class MapViewModel extends ChangeNotifier {
   BitmapDescriptor? dropOffMarker;
 
   Completer<GoogleMapController> mapController = Completer();
-
 
   // Set<Polyline> _polylines = {};
 
@@ -53,8 +53,6 @@ class MapViewModel extends ChangeNotifier {
   // bool get isRouteDrawn => _isRouteDrawn;
 
   bool get enteredInSelectingLocationMode => _enteredInSelectingLocationMode;
-
-
 
   bool get searchingDirections => _searchingDirections;
   bool get isPickUpFocussed => _isPickUpFocussed;
@@ -81,14 +79,10 @@ class MapViewModel extends ChangeNotifier {
   //   notifyListeners();
   // }
 
-
-
   set enteredInSelectingLocationMode(bool value) {
     _enteredInSelectingLocationMode = value;
     notifyListeners();
   }
-
- 
 
   set searchingDirections(bool value) {
     _searchingDirections = value;
@@ -106,6 +100,39 @@ class MapViewModel extends ChangeNotifier {
   }
 
   //FUNCTIONS
+
+  /// Function to animate the camera to a given LatLng position.
+//Animate camera given an location point
+  Future<void> animateCameraToPosition(LatLng locationToMove) async {
+    GoogleMapController controller = await mapController.future;
+    try {
+      await controller
+          .animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+        target: locationToMove,
+        zoom: 15,
+        bearing: 0,
+      )));
+    } catch (e) {
+      logger.e("Error trying to animate map camera: $e");
+    }
+  }
+
+  //Get and navigate to current location
+  void getCurrentLocationAndNavigate() async {
+    try {
+      // Get the current location
+      Position position = await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.medium)
+          .timeout(const Duration(seconds: 7));
+      animateCameraToPosition(
+        LatLng(position.latitude, position.longitude),
+      );
+      logger.i("GEt currento location executed...");
+      //Animate camera
+    } catch (e) {
+      logger.e("Error tracking location: $e");
+    }
+  }
 
   //Initialize all necesary data
   Future<void> initializeAnimations(
@@ -191,14 +218,15 @@ class MapViewModel extends ChangeNotifier {
             (!enteredInSelectingLocationMode &&
                 sharedProvider.dropOffCoordenates == null)) {
           if (sharedProvider.pickUpCoordenates != null &&
-             sharedProvider. selectingPickUpOrDropOff) {
+              sharedProvider.selectingPickUpOrDropOff) {
             // await getDirectionsText(pickUpCoordenates!);
             sharedProvider.pickUpLocation =
                 await MapServices.getReadableAddress(
                     sharedProvider.pickUpCoordenates!.latitude,
                     sharedProvider.pickUpCoordenates!.longitude,
                     apiKey);
-            addPickUpOrDropOffMarkerToMap(sharedProvider.pickUpCoordenates!,sharedProvider);
+            addPickUpOrDropOffMarkerToMap(
+                sharedProvider.pickUpCoordenates!, sharedProvider);
           }
           if (sharedProvider.dropOffCoordenates != null &&
               !sharedProvider.selectingPickUpOrDropOff) {
@@ -207,7 +235,8 @@ class MapViewModel extends ChangeNotifier {
                     sharedProvider.dropOffCoordenates!.latitude,
                     sharedProvider.dropOffCoordenates!.longitude,
                     apiKey);
-            addPickUpOrDropOffMarkerToMap(sharedProvider.dropOffCoordenates!,sharedProvider);
+            addPickUpOrDropOffMarkerToMap(
+                sharedProvider.dropOffCoordenates!, sharedProvider);
           }
         }
       },
@@ -215,29 +244,32 @@ class MapViewModel extends ChangeNotifier {
   }
 
   // Function to add a marker on map (CALLED BY: MapPage page and SelectDestination page)
-  void addPickUpOrDropOffMarkerToMap(LatLng position, SharedProvider sharedProvider) {
+  void addPickUpOrDropOffMarkerToMap(
+      LatLng position, SharedProvider sharedProvider) {
     //clean markers
     if (sharedProvider.selectingPickUpOrDropOff) {
       sharedProvider.markers.removeWhere(
         (element) => element.markerId == const MarkerId("pick_up"),
       );
     } else {
-     sharedProvider.markers.removeWhere(
+      sharedProvider.markers.removeWhere(
         (element) => element.markerId == const MarkerId("drop_off"),
       );
     }
     //add marker
     sharedProvider.markers.add(
       Marker(
-        markerId: MarkerId(sharedProvider.selectingPickUpOrDropOff ? "pick_up" : "drop_off"),
+        markerId: MarkerId(
+            sharedProvider.selectingPickUpOrDropOff ? "pick_up" : "drop_off"),
         position: position,
         infoWindow: const InfoWindow(
           title: 'Marker Title',
           snippet: 'Marker Snippet',
         ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(sharedProvider.selectingPickUpOrDropOff
-            ? BitmapDescriptor.hueRed
-            : BitmapDescriptor.hueGreen),
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+            sharedProvider.selectingPickUpOrDropOff
+                ? BitmapDescriptor.hueRed
+                : BitmapDescriptor.hueGreen),
       ),
     );
   }
@@ -264,24 +296,24 @@ class MapViewModel extends ChangeNotifier {
         color: Colors.blue,
       );
       sharedProvider.duration = routeInfo.duration;
-  }
+    }
 
     loading = false;
   }
 
   //Animate map camera to a especific point
-  void animateCameraToPosition(LatLng point) async {
-    GoogleMapController controller = await mapController.future;
-    controller.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng(point.latitude, point.longitude),
-          zoom: 15,
-          bearing: 0,
-        ),
-      ),
-    );
-  }
+  // void animateCameraToPosition(LatLng point) async {
+  //   GoogleMapController controller = await mapController.future;
+  //   controller.animateCamera(
+  //     CameraUpdate.newCameraPosition(
+  //       CameraPosition(
+  //         target: LatLng(point.latitude, point.longitude),
+  //         zoom: 15,
+  //         bearing: 0,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   //SEARCH DIRECTIONS BOTTOM SHEET
   //Get autocomplete direction
@@ -322,13 +354,15 @@ class MapViewModel extends ChangeNotifier {
         sharedProvider.pickUpCoordenates = response;
         //Pending: Add a Marker to that point
         sharedProvider.pickUpLocation = pickUpTextController.text;
-        addPickUpOrDropOffMarkerToMap(sharedProvider.pickUpCoordenates!,sharedProvider);
+        addPickUpOrDropOffMarkerToMap(
+            sharedProvider.pickUpCoordenates!, sharedProvider);
       }
       if (isDropOffFocussed) {
         sharedProvider.dropOffCoordenates = response;
         //Pending: Add a Marker to that point
         sharedProvider.dropOffLocation = dropOffTextController.text;
-        addPickUpOrDropOffMarkerToMap(sharedProvider.dropOffCoordenates!,sharedProvider);
+        addPickUpOrDropOffMarkerToMap(
+            sharedProvider.dropOffCoordenates!, sharedProvider);
       }
     }
     if (sharedProvider.pickUpCoordenates != null &&
@@ -358,7 +392,7 @@ class MapViewModel extends ChangeNotifier {
 
     pickUpFocusNode.addListener(() {
       isPickUpFocussed = pickUpFocusNode.hasFocus;
-     sharedProvider. selectingPickUpOrDropOff = true;
+      sharedProvider.selectingPickUpOrDropOff = true;
     });
     dropOffFocusNode.addListener(() {
       isDropOffFocussed = dropOffFocusNode.hasFocus;

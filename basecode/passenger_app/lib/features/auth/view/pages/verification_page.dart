@@ -44,6 +44,7 @@ class _VerificationPageState extends State<VerificationPage> {
               const SizedBox(height: 40),
               //Texfiel de verificacion
               CustomTextField(
+                isKeyboardNumber: true,
                 hintText: 'Código sms',
                 textEditingController: textController,
                 validator: (value) {

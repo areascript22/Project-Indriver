@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:passenger_app/features/home/view/widgets/card_current_location_essue.dart';
-import 'package:passenger_app/features/home/view/widgets/card_location_servicess_disabled.dart';
-import 'package:passenger_app/features/home/view/widgets/custom_drawer.dart';
+import 'package:passenger_app/features/home/view/widgets/servicess_issue_alert.dart';
 import 'package:passenger_app/features/home/viewmodel/home_view_model.dart';
 import 'package:passenger_app/features/map/view/pages/map_page.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
+import 'package:passenger_app/shared/widgets/custom_drawer.dart';
 import 'package:provider/provider.dart';
 
 class PassengerApp extends StatefulWidget {
@@ -30,16 +29,19 @@ class _PassengerAppState extends State<PassengerApp> {
 
   void checkGpsPermissions() async {
     final homeViewModel = Provider.of<HomeViewModel>(context, listen: false);
-    await homeViewModel.checkGpsPermissions();
+       final sharedProvider = Provider.of<SharedProvider>(context, listen: false);
+    await homeViewModel.checkGpsPermissions(sharedProvider);
     homeViewModel.listenToLocationServicesAtSystemLevel();
-    homeViewModel.startLocationTracking();
+    // homeViewModel.startLocationTracking();
   }
 
   @override
   Widget build(BuildContext context) {
+//     final GlobalKey<ScaffoldState> scaffoldkey = GlobalKey<ScaffoldState>();
     final homeViewModel = Provider.of<HomeViewModel>(context);
     final sharedProvider = Provider.of<SharedProvider>(context);
     return Scaffold(
+      drawer: const CustomDrawer(),
       appBar: AppBar(
         actions: [
           if (sharedProvider.deliveryLookingForDriver)
@@ -52,70 +54,25 @@ class _PassengerAppState extends State<PassengerApp> {
                   style: Theme.of(context).textTheme.bodyLarge,
                 )),
         ],
-        // bottom: PreferredSize(
-        //   preferredSize:
-        //       const Size.fromHeight(1.0), // Thin line with shadow height
-        //   child: Container(
-        //     height: 2.0, // Line thickness
-        //     decoration: BoxDecoration(
-        //       color: Colors.grey[300], // Line color (light gray)
-        //       boxShadow: [
-        //         BoxShadow(
-        //           color: Colors.black.withOpacity(0.1),
-        //           blurRadius: 1,
-        //           offset: const Offset(0, 1.5),
-        //         ),
-        //       ],
-        //     ),
-        //   ),
-        // ),
+        toolbarHeight: 0,
+        bottom: homeViewModel.getIssueBassedOnPriority() != null
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(60.0),
+                child: ServicesIssueAlert(
+                  dataMap: homeViewModel.getIssueBassedOnPriority()!,
+                ),
+              )
+            : null,
       ),
-      drawer: const CustomDrawer(),
-      body: Stack(
+      body: const Stack(
         children: [
           //Content
-          const IndexedStack(
+          IndexedStack(
             index: 0,
             children: [
               MapPage(),
             ],
           ),
-          //We can not find you on the map
-          if (!homeViewModel.isCurrentLocationAvailable)
-            Positioned(
-              top: 90,
-              right: 0,
-              left: 0,
-              child: CardCurrentLocationEssue(
-                homeViewModel: homeViewModel,
-                onTap: () {},
-              ),
-            ),
-
-          //Mesages (Lcoations, Services)
-          if (!homeViewModel.locationPermissionsSystemLevel)
-            Positioned(
-              top: 0,
-              right: 0,
-              left: 0,
-              child: LocationServicesDisabled(
-                homeViewModel: homeViewModel,
-                onTap: () async =>
-                    await homeViewModel.requestLocationServiceSystemLevel(),
-              ),
-            ),
-          //Mesages (Lcoations, Services)
-          if (!homeViewModel.locationPermissionUserLevel)
-            Positioned(
-              top: 0,
-              right: 0,
-              left: 0,
-              child: LocationServicesDisabled(
-                homeViewModel: homeViewModel,
-                onTap: () async =>
-                    await homeViewModel.requestPermissionsAtUserLevel(),
-              ),
-            ),
         ],
       ),
     );

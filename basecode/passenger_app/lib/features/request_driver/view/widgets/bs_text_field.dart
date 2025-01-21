@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ionicons/ionicons.dart';
 
 class BSTextField extends StatelessWidget {
   final TextEditingController textEditingController;
@@ -18,36 +19,13 @@ class BSTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: Colors.grey[800], // Dark background color
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3),
-        child: Row(
-          children: [
-            Icon(
-              leftIcon,
-              color: Colors.grey[400], // Slightly lighter color for the icon
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextField(
-                controller: textEditingController,
-                decoration: const InputDecoration(),
-              ),
-            ),
-            IconButton(
-              icon: Icon(
-                rightIcon,
-                color: Colors.grey[400], // Match color of the other icon
-              ),
-              onPressed: onRightIconPressed,
-            ),
-          ],
-        ),
+    return TextField(
+      
+      controller: textEditingController,
+      decoration: InputDecoration(
+        suffixIcon: const Icon(Ionicons.pencil_outline),
+        // icon: const Icon(Ionicons.pencil_outline),
+        hintText: hintText,
       ),
     );
   }

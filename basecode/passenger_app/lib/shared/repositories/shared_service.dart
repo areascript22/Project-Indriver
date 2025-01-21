@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
@@ -72,6 +74,29 @@ class SharedService {
       }
     } catch (e) {
       logger.e("Error fetching driver data: $e, ");
+      return null;
+    }
+  }
+
+  //Upload an audio file to Storage and get its URL
+  static Future<String?> uploadAudioToFirebase(String filePath) async {
+    final logger = Logger();
+    final passengerId = FirebaseAuth.instance.currentUser?.uid;
+    if (passengerId == null) {
+      logger.e("The passenger is not autenticated.");
+      return null;
+    }
+    try {
+      final firebaseStorage = FirebaseStorage.instance;
+      final fileName = '$passengerId.aac';
+      final storageRef =
+          firebaseStorage.ref().child('audio_requests/$fileName');
+      final uploadTask = await storageRef.putFile(File(filePath));
+      final downloadURL = await storageRef.getDownloadURL();
+      return downloadURL;
+    } catch (e) {
+      // Handle any errors that occur during upload
+      logger.e('Failed to upload audio: $e');
       return null;
     }
   }

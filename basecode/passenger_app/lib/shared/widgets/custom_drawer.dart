@@ -12,7 +12,7 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sharedViewModel = Provider.of<SharedProvider>(context);
+    final sharedViewModel = Provider.of<SharedProvider>(context, listen: false);
     return Drawer(
       child: Padding(
         padding: const EdgeInsets.only(left: 10, bottom: 20),
@@ -22,7 +22,7 @@ class CustomDrawer extends StatelessWidget {
             Column(
               children: [
                 //Header
-                const SizedBox(height: 60),
+                const SizedBox(height: 20),
                 //UserData
                 if (sharedViewModel.passengerModel != null)
                   Row(
