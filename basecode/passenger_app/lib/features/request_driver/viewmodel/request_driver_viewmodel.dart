@@ -1,12 +1,10 @@
 import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
 import 'package:logger/logger.dart';
 import 'package:passenger_app/core/utils/toast_message_util.dart';
 import 'package:passenger_app/features/request_driver/repositorie/request_driver_service.dart';
@@ -53,7 +51,6 @@ class RequestDriverViewModel extends ChangeNotifier {
       return;
     }
 
-    String? driverId;
     //GEt First Driver in Queue
     String? firstDriverKey =
         await RequestDriverService.getFirstDriverKeyOrderedByTimestamp();
@@ -61,11 +58,10 @@ class RequestDriverViewModel extends ChangeNotifier {
     DriverModel? driverInfo;
     bool passengerNodeUpdated = false;
     if (firstDriverKey != null) {
-      driverId = firstDriverKey;
       //There are drivers in queue
       driverInfo = await SharedService.getDriverInformationById(firstDriverKey);
       passengerNodeUpdated = await RequestDriverService.updatePassengerNode(
-          firstDriverKey, sharedProvider, requestType);
+          firstDriverKey, sharedProvider, requestType, 'passenger');
     } else {
       //There are not any drivers in Queue
       Map<String, dynamic>? nearestDriver =
@@ -76,10 +72,11 @@ class RequestDriverViewModel extends ChangeNotifier {
         driverInfo =
             await SharedService.getDriverInformationById(nearestDriverId);
         passengerNodeUpdated = await RequestDriverService.updatePassengerNode(
-            nearestDriverId, sharedProvider, requestType);
+            nearestDriverId, sharedProvider, requestType, 'passenger');
       } else {
         //There is not driver available in the map
         //Pass to Reqeusts queue
+        await addDriverRequestToQueue(sharedProvider, requestType);
       }
 
       ToastMessageUtil.showToast("Sin vehículos disponibles.");
@@ -93,6 +90,42 @@ class RequestDriverViewModel extends ChangeNotifier {
     }
     //Remove overlay when it's all comleted
     overlayEntry.remove();
+  }
+
+  //Add driver requuest to queue: Only if There aren't vehicles available
+  Future<void> addDriverRequestToQueue(
+      SharedProvider sharedProvider, String requestType) async {
+    bool driverRequestSuccess =
+        await RequestDriverService.addDriverRequestToQueue(sharedProvider);
+    if (!driverRequestSuccess) {
+      return;
+    }
+    sharedProvider.deliveryLookingForDriver = true;
+    //Listen to driver
+    final databaseRef = FirebaseDatabase.instance
+        .ref('driver_requests/${sharedProvider.passengerModel!.id}/driver');
+    databaseRef.onValue.listen((event) async {
+      if (event.snapshot.exists) {
+        String? driverId = event.snapshot.value as String?;
+        if (driverId == null) {
+          return;
+        }
+        logger.i("A driver has accepted us request. $driverId");
+        sharedProvider.deliveryLookingForDriver = false;
+        //ASUMING THERE IS A DRIVER
+        DriverModel? driverInfo =
+            await SharedService.getDriverInformationById(driverId);
+        bool passengerNodeUpdated =
+            await RequestDriverService.updatePassengerNode(
+                driverId, sharedProvider, requestType, 'secondPassenger');
+        //Move to Operation mode
+        if (passengerNodeUpdated && driverInfo != null) {
+          sharedProvider.driverModel = driverInfo;
+          //    _listenToDriverStatus(driverInfo.id, sharedProvider);
+          //  _listenToDriverCoordenates(driverInfo.id, sharedProvider);
+        }
+      }
+    });
   }
 
   //get the nearest driver
@@ -251,15 +284,25 @@ class RequestDriverViewModel extends ChangeNotifier {
     }
   }
 
-  void updateDriverStarRatings(
-      double newRating, String driverId, BuildContext context) async {
+  void updateDriverStarRatings(double newRating, String driverId,
+      BuildContext context, String comment) async {
     final overlay = Overlay.of(context);
     OverlayEntry overlayEntry = OverlayEntry(
       builder: (context) => const LoadingOverlay(),
     );
     overlay.insert(overlayEntry);
-    //Update star rating
-    await RequestDriverService.updateDriverStarRatings(newRating, driverId);
+    //Update star
+    final passengerId = FirebaseAuth.instance.currentUser?.uid;
+    if (passengerId != null) {
+      await RequestDriverService.updateDriverStarRatings(
+        newRating,
+        driverId,
+        comment,
+        passengerId,
+      );
+    } else {
+      logger.e("Error, usuario no autenticado");
+    }
 
     overlayEntry.remove();
     if (context.mounted) {

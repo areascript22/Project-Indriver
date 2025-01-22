@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:passenger_app/features/request_driver/view/widgets/star_ratings_bottom_sheet.dart';
 import 'package:passenger_app/shared/models/request_type.dart';
 import 'package:passenger_app/features/request_driver/view/widgets/request_driver_by_audio.dart';
 import 'package:passenger_app/features/request_driver/view/widgets/request_driver_by_text.dart';
@@ -222,6 +223,12 @@ class _RequestDriverBottomSheetState extends State<RequestDriverBottomSheet>
               ),
             ),
           const SizedBox(height: 5),
+          // CustomElevatedButton(
+          //   onTap: () {
+          //     showStarRatingsBottomSheet(context, '');
+          //   },
+          //   child: const Text("Test rating stars"),
+          // ),
           BSTextField(
             textEditingController: referenceTextController,
             hintText: "Referencia....",
