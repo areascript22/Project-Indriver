@@ -1,6 +1,10 @@
 import 'package:driver_app/features/home/view/widgets/custom_elevated_button.dart';
+import 'package:driver_app/features/ride_request/view/widgets/by_audio_info.dart';
+import 'package:driver_app/features/ride_request/view/widgets/by_coordinates_info.dart';
+import 'package:driver_app/features/ride_request/view/widgets/by_text_info.dart';
 import 'package:driver_app/features/ride_request/viewmodel/ride_request_viewmodel.dart';
 import 'package:driver_app/shared/models/driver.dart';
+import 'package:driver_app/shared/models/request_type.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +21,21 @@ class _PassengerInfoCardState extends State<PassengerInfoCard> {
   Widget build(BuildContext context) {
     final rideRequestViewModel = Provider.of<RideRequestViewModel>(context);
     return Container(
-      decoration: const BoxDecoration(color: Colors.white),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(15),
+          topRight: Radius.circular(15),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
       child: rideRequestViewModel.passengerInformation != null
           ? Padding(
               padding: const EdgeInsets.all(10),
@@ -60,77 +78,32 @@ class _PassengerInfoCardState extends State<PassengerInfoCard> {
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             const Text("Nuevo"),
-                            // Row(
-                            //   children: [
-                            //     const Icon(Icons.star, size: 16, color: Colors.yellow),
-                            //     if (mapDataProvider.user!.totalTrips >= 2)
-                            //       Text(
-                            //           "${mapDataProvider.user!.rating.toString()}(${mapDataProvider.user!.totalTrips})"),
-                            //     if (mapDataProvider.user!.totalTrips < 2) const Text("Nuevo"),
-                            //   ],
-                            // ),
                           ],
                         ),
                       ),
                       //Locations pick-up and drop-off
-                      Expanded(
-                        child: Container(
-                          decoration: const BoxDecoration(),
-                          child: Column(
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Ionicons.location,
-                                        color: Colors.green,
-                                      ),
-                                      Expanded(
-                                        child: Text(
-                                          rideRequestViewModel
-                                              .passengerInformation!
-                                              .pickUpLocation,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Ionicons.location,
-                                        color: Colors.blue,
-                                      ),
-                                      Expanded(
-                                        child: Text(
-                                          rideRequestViewModel
-                                              .passengerInformation!
-                                              .dropOffLocation,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      //Comunication options (if it is in operation mode)
+                      if (rideRequestViewModel.requestType ==
+                          RequestType.byCoordinates)
+                        byCoordinatesInfo(
+                            rideRequestViewModel: rideRequestViewModel),
 
+                      //Audio
+                      if (rideRequestViewModel.requestType ==
+                          RequestType.byRecordedAudio)
+                        const ByAudioInfo(),
+
+                      //text
+                      if (rideRequestViewModel.requestType ==
+                          RequestType.byTexting)
+                        const ByTextInfo(),
+
+                      //Comunication options (if it is in operation mode)
                       Column(
                         children: [
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Ionicons.chatbox_ellipses_outline),
-                          ),
+                          // IconButton(
+                          //   onPressed: () {},
+                          //   icon: const Icon(Ionicons.chatbox_ellipses_outline),
+                          // ),
                           IconButton(
                             onPressed: () {},
                             icon: const Icon(Ionicons.call_outline),
@@ -157,17 +130,17 @@ class _PassengerInfoCardState extends State<PassengerInfoCard> {
                   //'HE LLEGADO' button
                   if (rideRequestViewModel.driverRideStatus ==
                       DriverRideStatus.goingToDropOff)
-                  CustomElevatedButton(
-                    onTap: () async {
-                      //Update Status to "arrived" to notify Passenger
-                      rideRequestViewModel
-                          .updateDriverStatus(DriverRideStatus.finished);
-                      //Update to "pending" to be able to accept requests again
-                      rideRequestViewModel
-                          .updateDriverStatus(DriverRideStatus.pending);
-                    },
-                    child: const Text("Finalizar viaje"),
-                  ),
+                    CustomElevatedButton(
+                      onTap: () async {
+                        //Update Status to "arrived" to notify Passenger
+                        rideRequestViewModel
+                            .updateDriverStatus(DriverRideStatus.finished);
+                        //Update to "pending" to be able to accept requests again
+                        rideRequestViewModel
+                            .updateDriverStatus(DriverRideStatus.pending);
+                      },
+                      child: const Text("Finalizar viaje"),
+                    ),
                 ],
               ),
             )

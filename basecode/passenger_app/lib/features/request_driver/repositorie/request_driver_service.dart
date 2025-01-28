@@ -49,8 +49,14 @@ class RequestDriverService {
   }
 
   //Add request data under "drivers/key" node
-  static Future<bool> updatePassengerNode(String driverId,
-      SharedProvider sharedProvider, String requestType, String nodeName) async {
+  static Future<bool> updatePassengerNode(
+    String driverId,
+    SharedProvider sharedProvider,
+    String requestType,
+    String nodeName, {
+    String? audioFilePath,
+    String? indicationText,
+  }) async {
     final Logger logger = Logger();
     try {
       // Reference to the main node (e.g., a driver ID or any other node ID)
@@ -63,20 +69,29 @@ class RequestDriverService {
         'status': "pending",
         'type': requestType,
         'information': {
-          'audioFilePath': '', //In case it is 'byRecordedAudio' type
-          'indicationText': '', //In case it is 'byTexting' type
+          'audioFilePath':
+              audioFilePath ?? '', //In case it is 'byRecordedAudio' type
+          'indicationText': indicationText??'', //In case it is 'byTexting' type
           'name': sharedProvider.passengerModel!.name,
           'phone': sharedProvider.passengerModel!.phone,
           'profilePicture': sharedProvider.passengerModel!.profilePicture,
           'pickUpLocation': sharedProvider.pickUpLocation ?? '',
           'dropOffLocation': sharedProvider.dropOffLocation ?? '',
           "pickUpCoordenates": {
-            "latitude": sharedProvider.pickUpCoordenates?.latitude,
-            "longitude": sharedProvider.pickUpCoordenates?.longitude,
+            "latitude": sharedProvider.pickUpCoordenates != null
+                ? sharedProvider.pickUpCoordenates!.latitude
+                : 0.1, //To make sure that the data that will be updated are Double
+            "longitude": sharedProvider.pickUpCoordenates != null
+                ? sharedProvider.pickUpCoordenates!.longitude
+                : 0.1,
           },
           "dropOffCoordenates": {
-            "latitude": sharedProvider.dropOffCoordenates?.latitude,
-            "longitude": sharedProvider.dropOffCoordenates?.longitude,
+            "latitude": sharedProvider.dropOffCoordenates != null
+                ? sharedProvider.dropOffCoordenates!.latitude
+                : 0.1,
+            "longitude": sharedProvider.dropOffCoordenates != null
+                ? sharedProvider.dropOffCoordenates!.longitude
+                : 0.1,
           },
         },
       });

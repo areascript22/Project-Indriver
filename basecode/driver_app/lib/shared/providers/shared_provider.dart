@@ -12,10 +12,16 @@ class SharedProvider extends ChangeNotifier {
   bool isGPSPermissionsEnabled = false;
   Position? driverCurrentPosition;
   String? rideRequestmodel;
+  int _currentPageIndez = 0;
 
+  //GETTERS
+  int get currentPageIndez => _currentPageIndez;
 
- 
-
+  //SETTERS
+  set currentPageIndez(int value) {
+    _currentPageIndez = value;
+    notifyListeners();
+  }
 
   //BOTTOM SHEET: It displays all available maps
   Future<void> showAllAvailableMaps(

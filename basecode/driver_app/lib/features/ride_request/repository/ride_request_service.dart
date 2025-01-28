@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:driver_app/shared/models/passenger.dart';
+import 'package:driver_app/shared/models/ride_history_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:logger/logger.dart';
@@ -81,6 +84,61 @@ class RideRequestService {
     } catch (e) {
       // Handle any errors
       logger.e("Error removing passenger node: $e");
+    }
+  }
+
+  //Deleto second driver
+  // Static function to remove data from Firebase Realtime Database
+  static Future<void> removesecondPassengerInfo() async {
+    final logger = Logger();
+    //get driver id
+    String? uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      logger.e("Driver is not authenticated..");
+      return;
+    }
+    try {
+      // Reference to the 'drivers/driverId/passenger' node
+      DatabaseReference ref =
+          FirebaseDatabase.instance.ref("drivers/$uid/secondPassenger");
+
+      // Remove the 'passenger' node
+      await ref.remove();
+      logger.i("Passenger node removed successfully.");
+    } catch (e) {
+      // Handle any errors
+      logger.e("Error removing passenger node: $e");
+    }
+  }
+
+  //Covert second driver to first driver
+  static Future<void> addPassengerDataToRequest(Passenger passenger) async {
+    final logger = Logger();
+    String? driverId = FirebaseAuth.instance.currentUser?.uid;
+    if (driverId == null) {
+      logger.e("Driver is not authenticated..");
+      return;
+    }
+    try {
+      final DatabaseReference mainNodeRef =
+          FirebaseDatabase.instance.ref('drivers/$driverId/passenger');
+      await mainNodeRef.set(passenger.toMap());
+      logger.i("Second passenger turned into Passenger: ${passenger.toMap()}");
+    } catch (e) {
+      logger.e("Error trying to write data: $e");
+    }
+  }
+
+  // Upload the ride data to Firestore
+  static Future<void> uploadRideHistory(RideHistoryModel rideHistory) async {
+    final logger = Logger();
+    try {
+      final rideCollection =
+          FirebaseFirestore.instance.collection('ride_history');
+      final rideDoc = await rideCollection.add(rideHistory.toMap());
+      logger.i("Ride uploaded successfully with ID: ${rideDoc.id}");
+    } catch (e) {
+      logger.e("Error uploading ride history: $e");
     }
   }
 }

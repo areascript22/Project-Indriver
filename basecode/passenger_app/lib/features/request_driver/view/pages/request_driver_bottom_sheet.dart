@@ -38,6 +38,23 @@ class _RequestDriverBottomSheetState extends State<RequestDriverBottomSheet>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    initializeValues();
+  }
+
+  void initializeValues() {
+    final sharedProvider = Provider.of<SharedProvider>(context, listen: false);
+    switch (sharedProvider.requestType) {
+      case RequestType.byCoordinates:
+        _tabController.index = 0;
+        break;
+      case RequestType.byRecordedAudio:
+        _tabController.index = 1;
+        break;
+      case RequestType.byTexting:
+        _tabController.index = 2;
+        break;
+      default:
+    }
   }
 
   @override
@@ -114,6 +131,21 @@ class _RequestDriverBottomSheetState extends State<RequestDriverBottomSheet>
                     Tab(text: 'Por micrófono'),
                     Tab(text: 'Por texto'),
                   ],
+                  onTap: (value) {
+                    switch (value) {
+                      case 0:
+                        sharedViewModel.requestType = RequestType.byCoordinates;
+                        break;
+                      case 1:
+                        sharedViewModel.requestType =
+                            RequestType.byRecordedAudio;
+                        break;
+                      case 2:
+                        sharedViewModel.requestType = RequestType.byTexting;
+                        break;
+                      default:
+                    }
+                  },
                 ),
                 // TabBarView below the TabBar
                 SizedBox(

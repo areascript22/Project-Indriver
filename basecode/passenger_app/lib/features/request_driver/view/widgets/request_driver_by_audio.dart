@@ -98,6 +98,7 @@ class _RequestDriverByAudioState extends State<RequestDriverByAudio> {
   Future<void> _removeRecordedAudio() async {
     if (_audioFilePath == null) return;
     await _recorder.deleteRecord(fileName: _audioFilePath!);
+    _audioFilePath = null;
     setState(() {
       _audioRecorded = false;
     });
@@ -314,17 +315,24 @@ class _RequestDriverByAudioState extends State<RequestDriverByAudio> {
           //Reqeust button
           const SizedBox(height: 15),
           CustomElevatedButton(
-            onTap: () {
-              if (!_audioRecorded) {
+            onTap: () async {
+              if (!_audioRecorded || _audioFilePath == null) {
                 ToastMessageUtil.showToast(
                     "Graba un audio par pedir tu vehículo.");
                 return;
               }
               //Upload the audio to Firebase and get its URL
-              String audioUrl = '';
+              String? audioUrl = await requestDriverViewModel
+                  .uploadRecordedAudioToStorage(_audioFilePath!, context);
               //Request Taxi
-              requestDriverViewModel.requestTaxi(
-                  context, sharedProvider, RequestType.byRecordedAudio);
+              if (context.mounted) {
+                requestDriverViewModel.requestTaxi(
+                  context,
+                  sharedProvider,
+                  RequestType.byRecordedAudio,
+                  audioFilePath: audioUrl,
+                );
+              }
             },
             child: const Text("Solicitar taxi"),
           ),

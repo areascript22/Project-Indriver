@@ -11,10 +11,12 @@ import 'package:passenger_app/features/request_driver/repositorie/request_driver
 import 'package:passenger_app/features/request_driver/view/widgets/driver_arrived_bottom_sheet.dart';
 import 'package:passenger_app/features/request_driver/view/widgets/star_ratings_bottom_sheet.dart';
 import 'package:passenger_app/shared/models/driver_model.dart';
+import 'package:passenger_app/shared/models/request_type.dart';
 import 'package:passenger_app/shared/models/route_info.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
 import 'package:passenger_app/shared/repositories/shared_service.dart';
 import 'package:passenger_app/shared/widgets/loading_overlay.dart';
+import 'package:passenger_app/shared/widgets/waiting_for_drover_overlay.dart';
 
 class RequestDriverViewModel extends ChangeNotifier {
   final Logger logger = Logger();
@@ -22,6 +24,7 @@ class RequestDriverViewModel extends ChangeNotifier {
   //listeners
   StreamSubscription<DatabaseEvent>? driverStatusListener;
   StreamSubscription<DatabaseEvent>? driverPositionListener;
+  StreamSubscription<DatabaseEvent>? passengerIdChangesListener;
 
   //GETTERS
 
@@ -31,11 +34,17 @@ class RequestDriverViewModel extends ChangeNotifier {
   void cancelDriverListeners() {
     driverStatusListener?.cancel();
     driverPositionListener?.cancel();
+    passengerIdChangesListener?.cancel();
   }
 
   //Request Driver
-  void requestTaxi(BuildContext context, SharedProvider sharedProvider,
-      String requestType) async {
+  void requestTaxi(
+    BuildContext context,
+    SharedProvider sharedProvider,
+    String requestType, {
+    String? audioFilePath,
+    String? indicationText,
+  }) async {
     //Display the overlay
     OverlayEntry? overlayEntry;
     final overlay = Overlay.of(context);
@@ -43,7 +52,7 @@ class RequestDriverViewModel extends ChangeNotifier {
       builder: (context) => const LoadingOverlay(),
     );
     overlay.insert(overlayEntry);
-
+    ////
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       logger.e("Error, user not authenticated");
@@ -61,25 +70,48 @@ class RequestDriverViewModel extends ChangeNotifier {
       //There are drivers in queue
       driverInfo = await SharedService.getDriverInformationById(firstDriverKey);
       passengerNodeUpdated = await RequestDriverService.updatePassengerNode(
-          firstDriverKey, sharedProvider, requestType, 'passenger');
-    } else {
+        firstDriverKey,
+        sharedProvider,
+        requestType,
+        'passenger',
+        audioFilePath: audioFilePath,
+        indicationText: indicationText,
+      );
+    }
+
+    if (firstDriverKey == null) {
       //There are not any drivers in Queue
+      if (sharedProvider.passengerCurrentCoords == null) {
+        ToastMessageUtil.showToast("Sin señal gps. Muevete a un mejor lugar.");
+        overlayEntry.remove();
+        return;
+      }
       Map<String, dynamic>? nearestDriver =
           await _findNearestDriver(sharedProvider.passengerCurrentCoords!);
       if (nearestDriver != null) {
         //We find a driver available in the map
+        logger.f("debugging: Nearest driver ID");
         String nearestDriverId = nearestDriver['driverID'];
         driverInfo =
             await SharedService.getDriverInformationById(nearestDriverId);
         passengerNodeUpdated = await RequestDriverService.updatePassengerNode(
-            nearestDriverId, sharedProvider, requestType, 'passenger');
+          nearestDriverId,
+          sharedProvider,
+          requestType,
+          'passenger',
+          audioFilePath: audioFilePath,
+          indicationText: indicationText,
+        );
       } else {
         //There is not driver available in the map
         //Pass to Reqeusts queue
-        await addDriverRequestToQueue(sharedProvider, requestType);
+        await addDriverRequestToQueue(
+          sharedProvider,
+          requestType,
+          audioFilePath: audioFilePath,
+          indicationText: indicationText,
+        );
       }
-
-      ToastMessageUtil.showToast("Sin vehículos disponibles.");
     }
 
     //Move to Operation mode
@@ -94,13 +126,20 @@ class RequestDriverViewModel extends ChangeNotifier {
 
   //Add driver requuest to queue: Only if There aren't vehicles available
   Future<void> addDriverRequestToQueue(
-      SharedProvider sharedProvider, String requestType) async {
+    SharedProvider sharedProvider,
+    String requestType, {
+    String? audioFilePath,
+    String? indicationText,
+  }) async {
     bool driverRequestSuccess =
         await RequestDriverService.addDriverRequestToQueue(sharedProvider);
     if (!driverRequestSuccess) {
       return;
     }
     sharedProvider.deliveryLookingForDriver = true;
+    // showWaitingForDriverOverlay(sharedProvider.mapPageContext!, () {
+    //   Navigator.pop(sharedProvider.mapPageContext!);
+    // });
     //Listen to driver
     final databaseRef = FirebaseDatabase.instance
         .ref('driver_requests/${sharedProvider.passengerModel!.id}/driver');
@@ -117,12 +156,43 @@ class RequestDriverViewModel extends ChangeNotifier {
             await SharedService.getDriverInformationById(driverId);
         bool passengerNodeUpdated =
             await RequestDriverService.updatePassengerNode(
-                driverId, sharedProvider, requestType, 'secondPassenger');
+          driverId,
+          sharedProvider,
+          requestType,
+          'secondPassenger',
+          audioFilePath: audioFilePath,
+          indicationText: indicationText,
+        );
         //Move to Operation mode
         if (passengerNodeUpdated && driverInfo != null) {
           sharedProvider.driverModel = driverInfo;
           //    _listenToDriverStatus(driverInfo.id, sharedProvider);
-          //  _listenToDriverCoordenates(driverInfo.id, sharedProvider);
+          _listenToDriverCoordenates(driverInfo.id, sharedProvider);
+          _listenToPassengerIdChanges(
+              driverId, sharedProvider.passengerModel!.id, sharedProvider);
+        }
+      }
+    });
+  }
+
+  //Listen when Our request pass to be the Current ride
+  void _listenToPassengerIdChanges(
+      String driverId, String passengerId, SharedProvider sharedProvider) {
+    final databaseRef = FirebaseDatabase.instance.ref();
+
+    // Define the path to listen for passengerId changes
+    final passengerIdPath =
+        databaseRef.child('drivers/$driverId/passenger/passengerId');
+
+    passengerIdChangesListener =
+        passengerIdPath.onValue.listen((DatabaseEvent event) {
+      if (event.snapshot.value != null) {
+        String passengerIdTemp = event.snapshot.value.toString();
+
+        // Check if the passengerId matches "123456"
+        if (passengerIdTemp == passengerId) {
+          logger.i("Pasenger id : $passengerIdTemp  our id; $passengerId");
+          _listenToDriverStatus(driverId, sharedProvider);
         }
       }
     });
@@ -181,6 +251,12 @@ class RequestDriverViewModel extends ChangeNotifier {
               markerId: const MarkerId("marker_id"),
               icon: sharedProvider.driverIcon ?? BitmapDescriptor.defaultMarker,
               position: driverCoords);
+          //Check if it is necesary to draw route
+          if (sharedProvider.pickUpCoordenates == null ||
+              sharedProvider.dropOffCoordenates == null ||
+              sharedProvider.requestType != RequestType.byCoordinates) {
+            return;
+          }
           //Update Polyline (Route from Driver to pick up point)
           LatLng destination = sharedProvider.pickUpCoordenates!;
           if (sharedProvider.driverStatus == DriverRideStatus.goingToDropOff) {
@@ -234,19 +310,31 @@ class RequestDriverViewModel extends ChangeNotifier {
               break;
             case DriverRideStatus.finished:
               sharedProvider.driverStatus = DriverRideStatus.finished;
+
               //Rate the driver
               showStarRatingsBottomSheet(sharedProvider.mapPageContext!,
                   sharedProvider.driverModel!.id);
+
               //Return to normal state of the appp
               sharedProvider.driverModel = null;
+
               sharedProvider.dropOffCoordenates = null;
+
               sharedProvider.dropOffLocation = null;
+
               sharedProvider.pickUpCoordenates = null;
+
               sharedProvider.pickUpLocation = null;
+
               sharedProvider.selectingPickUpOrDropOff = true;
+
               sharedProvider.duration = null;
+
               sharedProvider.markers.clear();
-              sharedProvider.polylineFromPickUpToDropOff.points.clear();
+
+              sharedProvider.polylineFromPickUpToDropOff =
+                  const Polyline(polylineId: PolylineId("default"));
+
               cancelDriverListeners();
 
               break;
@@ -308,5 +396,25 @@ class RequestDriverViewModel extends ChangeNotifier {
     if (context.mounted) {
       Navigator.pop(context);
     }
+  }
+
+  //Upload recorded audio to Firestore Storage
+  Future<String?> uploadRecordedAudioToStorage(
+      String audioFilePath, BuildContext context) async {
+    final overlay = Overlay.of(context);
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => const LoadingOverlay(),
+    );
+    overlay.insert(overlayEntry);
+    ////
+    final passengerId = FirebaseAuth.instance.currentUser?.uid;
+    if (passengerId == null) {
+      logger.e("Error: Passenger is not authenticated.");
+      return null;
+    }
+    String? response =
+        await SharedService.uploadAudioToFirebase(audioFilePath, passengerId);
+    overlayEntry.remove();
+    return response;
   }
 }

@@ -4,6 +4,7 @@ import 'package:passenger_app/core/utils/dialog_util.dart';
 import 'package:passenger_app/features/auth/view/pages/auth_wrapper.dart';
 import 'package:passenger_app/features/home/repositories/home_services.dart';
 import 'package:passenger_app/features/profile/view/pages/edit_profile_page.dart';
+import 'package:passenger_app/features/ride_history/repository/pages/ride_history_page.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -102,7 +103,13 @@ class CustomDrawer extends StatelessWidget {
                     "Historial de solicitudes",
                     style: TextStyle(fontSize: 17),
                   ),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RideHistoryPage(),
+                        ));
+                  },
                 ),
 
                 //COnfiguración

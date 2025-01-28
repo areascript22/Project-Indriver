@@ -1,10 +1,10 @@
-import 'package:driver_app/features/auth/repository/auth_service.dart';
 import 'package:driver_app/features/auth/view/pages/password_recovery_page.dart';
 import 'package:driver_app/features/auth/view/widgets/auth_gradient_button.dart';
 import 'package:driver_app/features/auth/view/widgets/custom_text_field.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:driver_app/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -17,12 +17,12 @@ class _SignInPageState extends State<SignInPage> {
   final emailTextController = TextEditingController();
   final passwordTextController = TextEditingController();
   final formKey = GlobalKey<FormState>(); // Form key for validation
-  final AuthService _auth = AuthService();
+
   final Logger logger = Logger();
-  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
+    final authViewModel = Provider.of<AuthViewModel>(context);
     return Scaffold(
       appBar: AppBar(),
       body: Form(
@@ -76,7 +76,7 @@ class _SignInPageState extends State<SignInPage> {
               //Sign In Button
               const SizedBox(height: 15),
               AuthGradientButton(
-                child: !isLoading
+                child: !authViewModel.loading
                     ? const Text(
                         'Inisiar sesion',
                         style: TextStyle(
@@ -87,32 +87,8 @@ class _SignInPageState extends State<SignInPage> {
                   // Validate the form
 
                   if (formKey.currentState?.validate() ?? false) {
-                    setState(() {
-                      isLoading = true;
-                    });
-                    User? user = await _auth.loginWithEmailAndPassword(
+                    await authViewModel.signIn(
                         emailTextController.text, passwordTextController.text);
-                    if (user != null) {
-                      logger.e(
-                          "Sending verification email : ${user.emailVerified}");
-
-                      if (!user.emailVerified) {
-                        await _auth.sendVerificationEmail(user);
-                        logger.i("Email just verified....");
-                      }
-                    } else {
-                      setState(() {
-                      isLoading = false;
-                    });
-                      //Toast
-
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text("Usuario no registrado")));
-                      }
-                    }
-                    
                   }
                 },
               ),

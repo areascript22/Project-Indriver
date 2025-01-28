@@ -1,7 +1,10 @@
+import 'package:driver_app/features/home/view/widgets/custom_drawe.dart';
 import 'package:driver_app/features/ride_request/view/widgets/driver_queue.dart';
 import 'package:driver_app/features/ride_request/view/widgets/passenger_info_card.dart';
+import 'package:driver_app/features/ride_request/view/widgets/second_passenger_tile.dart';
 import 'package:driver_app/features/ride_request/viewmodel/ride_request_viewmodel.dart';
 import 'package:driver_app/shared/providers/shared_provider.dart';
+import 'package:driver_app/shared/widgets/custom_circular_button.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ionicons/ionicons.dart';
@@ -16,6 +19,7 @@ class RideMRequestPage extends StatefulWidget {
 }
 
 class _RideMRequestPageState extends State<RideMRequestPage> {
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final logger = Logger();
   late RideRequestViewModel providerToDispose;
   @override
@@ -25,13 +29,13 @@ class _RideMRequestPageState extends State<RideMRequestPage> {
   }
 
   void initializeData() {
-    logger.i("RIDE REQUEST PAGE: Initilizaing....");
     final sharedProvider = Provider.of<SharedProvider>(context, listen: false);
     final rideRequestViewModel =
         Provider.of<RideRequestViewModel>(context, listen: false);
     providerToDispose = rideRequestViewModel;
     rideRequestViewModel.listenToDriverCoordenatesInFirebase(sharedProvider);
     rideRequestViewModel.listenerToPassengerRequest(sharedProvider);
+    rideRequestViewModel.listenToSecondPassangerRequest();
     rideRequestViewModel.listenToDriverStatus(sharedProvider);
   }
 
@@ -47,6 +51,19 @@ class _RideMRequestPageState extends State<RideMRequestPage> {
     // final sharedProvider = Provider.of<SharedProvider>(context);
     rideRequestViewModel.rideRequestPageContext = context;
     return Scaffold(
+      key: scaffoldKey,
+      appBar: AppBar(
+        toolbarHeight: 0,
+        bottom: rideRequestViewModel.secondPassenger != null
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(100.0),
+                child: SecondPassengerTile(
+                    secondPassengerInfo:
+                        rideRequestViewModel.secondPassenger!.information),
+              )
+            : null,
+      ),
+      drawer: const CustomDrawer(),
       body: Stack(
         children: [
           //Map
@@ -62,6 +79,17 @@ class _RideMRequestPageState extends State<RideMRequestPage> {
             onMapCreated: (controller) {
               // rideRequestViewModel.onMapCreated(controller, sharedProvider);
             },
+          ),
+          //Menu
+          Positioned(
+            top: 5,
+            left: 10,
+            child: CustomCircularButton(
+              onPressed: () {
+                scaffoldKey.currentState?.openDrawer();
+              },
+              icon: const Icon(Ionicons.menu_outline),
+            ),
           ),
           //Button
           //BUTTON: Select Position Taxi

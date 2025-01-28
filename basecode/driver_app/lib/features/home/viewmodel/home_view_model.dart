@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:driver_app/features/home/repository/home_realtime_db_service.dart';
 import 'package:driver_app/shared/models/driver.dart';
 import 'package:driver_app/shared/providers/shared_provider.dart';
+import 'package:driver_app/shared/repositorie/shared_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,10 +17,13 @@ class HomeViewModel extends ChangeNotifier {
   Driver? driver;
   final Logger logger = Logger();
   lc.Location location = lc.Location();
+  bool _loading = false;
 
-  //Permissions
-  late StreamSubscription<ServiceStatus> serviceStatusSubscription;
+  //LISTENERS
+  StreamSubscription<ServiceStatus>? locationServicesAtSystemLevelListener;
   StreamSubscription<Position>? locationListener;
+  StreamSubscription<DatabaseEvent>? requestLitener;
+
   bool _locationPermissionsSystemLevel =
       true; //Location services at System level
   bool _locationPermissionUserLevel = false; // Location services at User level
@@ -29,6 +33,7 @@ class HomeViewModel extends ChangeNotifier {
   int _deliveryRequestLength = 0;
 
   //GETTERS
+  bool get loading => _loading;
   bool get isCurrentLocationAvailable => _isCurrentLocationAvailable;
   bool get locationPermissionsSystemLevel => _locationPermissionsSystemLevel;
   bool get locationPermissionUserLevel => _locationPermissionUserLevel;
@@ -36,6 +41,10 @@ class HomeViewModel extends ChangeNotifier {
   int get deliveryRequestLength => _deliveryRequestLength;
 
   //SETTERS
+  set loading(bool value) {
+    _loading = value;
+    notifyListeners();
+  }
 
   set locationPermissionsSystemLevel(bool value) {
     _locationPermissionsSystemLevel = value;
@@ -63,6 +72,19 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   //FUNCTIONS
+  void clearListeners() {
+    locationServicesAtSystemLevelListener?.cancel();
+    locationListener?.cancel();
+    requestLitener?.cancel();
+  }
+
+  //Sign out
+  Future<void> signOut() async {
+    loading = true;
+    await SharedService.signOut();
+    loading = false;
+  }
+
   //get issue bassed on priority
   Map? getIssueBassedOnPriority() {
     if (!locationPermissionUserLevel) {
@@ -94,7 +116,7 @@ class HomeViewModel extends ChangeNotifier {
 
   // To listen only Delivery request lenght
   void listenToRequests(DatabaseReference requestsRef) {
-    requestsRef.onValue.listen((event) {
+    requestLitener = requestsRef.onValue.listen((event) {
       final data = event.snapshot.value as Map?;
       if (data != null) {
         // Filter pending requests
@@ -209,7 +231,7 @@ class HomeViewModel extends ChangeNotifier {
 
   /// Listens to changes in location service status
   void listenToLocationServicesAtSystemLevel() {
-    serviceStatusSubscription =
+    locationServicesAtSystemLevelListener =
         Geolocator.getServiceStatusStream().listen((ServiceStatus status) {
       locationPermissionsSystemLevel = (status == ServiceStatus.enabled);
     });

@@ -1,16 +1,17 @@
-import 'package:driver_app/features/auth/repository/auth_service.dart';
 import 'package:driver_app/features/auth/view/widgets/auth_gradient_button.dart';
 import 'package:driver_app/features/auth/view/widgets/custom_text_field.dart';
+import 'package:driver_app/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class PasswordRecoveryPage extends StatelessWidget {
   const PasswordRecoveryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authViewModel = Provider.of<AuthViewModel>(context);
     final emailTextController = TextEditingController();
     final formKey = GlobalKey<FormState>(); // Form key for validation
-    final AuthService auth = AuthService();
 
     return Scaffold(
       appBar: AppBar(),
@@ -54,14 +55,19 @@ class PasswordRecoveryPage extends StatelessWidget {
               //Sign In Button
               const SizedBox(height: 15),
               AuthGradientButton(
-                child: const Text(
-                  'Recuperar',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-                ),
+                child: authViewModel.loading
+                    ? const Text(
+                        'Recuperar',
+                        style: TextStyle(
+                            fontSize: 17, fontWeight: FontWeight.w600),
+                      )
+                    : const CircularProgressIndicator(
+                        color: Colors.blue,
+                      ),
                 onPressed: () async {
                   // Validate the form
                   if (formKey.currentState?.validate() ?? false) {
-                    await auth.sendPasswordRecoveryEmail(
+                    await authViewModel.sendPasswordRecoveryEmail(
                         emailTextController.text, context);
                     if (context.mounted) {
                       Navigator.pop(context);

@@ -1,5 +1,6 @@
 import 'package:driver_app/core/utils/dialog/dialog_util.dart';
-import 'package:driver_app/features/auth/repository/auth_service.dart';
+import 'package:driver_app/features/home/viewmodel/home_view_model.dart';
+import 'package:driver_app/features/ride_history/view/pages/ride_history_page.dart';
 import 'package:driver_app/shared/providers/shared_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
@@ -11,6 +12,7 @@ class CustomDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sharedProvider = Provider.of<SharedProvider>(context);
+    final homeViewModel = Provider.of<HomeViewModel>(context);
     return Drawer(
       backgroundColor: Theme.of(context).colorScheme.background,
       child: Padding(
@@ -92,17 +94,25 @@ class CustomDrawer extends StatelessWidget {
                     ],
                   ),
                 //Configuración
+                //Trips history
+                ListTile(
+                  leading: const Icon(Ionicons.car),
+                  title: const Text("Historial de viajes"),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RideHistoryPage(),
+                      ),
+                    );
+                  },
+                ),
                 ListTile(
                   leading: const Icon(Ionicons.settings),
                   title: const Text("Configuración"),
                   onTap: () {},
                 ),
-                //Trips history
-                ListTile(
-                  leading: const Icon(Ionicons.car),
-                  title: const Text("Historial de viajes"),
-                  onTap: () {},
-                ),
+
                 //Help for driver
                 ListTile(
                   leading: const Icon(Ionicons.help),
@@ -121,8 +131,8 @@ class CustomDrawer extends StatelessWidget {
                   DialogUtil.messageDialog(
                       context: context,
                       onAccept: () async {
-                        AuthService auth = AuthService();
-                        await auth.signOut();
+                        //  Navigator.pop(context);
+                        await homeViewModel.signOut();
                         if (context.mounted) {
                           Navigator.pop(context);
                         }

@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:driver_app/shared/models/route_info.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
 
-class SharedService{
-
-   //It returns a route as polylines (it is use to update polyline in Porvider)
+class SharedService {
+  //It returns a route as polylines (it is use to update polyline in Porvider)
   static Future<RouteInfo?> getRoutePolylinePoints(
       LatLng start, LatLng end, String apiKey) async {
     final Logger logger = Logger();
@@ -52,5 +52,11 @@ class SharedService{
       logger.e('Error fetching route: $e');
       return null;
     }
+  }
+
+  // Sign out
+  static Future<void> signOut() async {
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    await auth.signOut();
   }
 }

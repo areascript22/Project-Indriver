@@ -60,7 +60,11 @@ class RequestDriverByTyping extends StatelessWidget {
               }
               //Request the vehicle
               requestDriverViewModel.requestTaxi(
-                  context, sharedProvider, RequestType.byTexting);
+                context,
+                sharedProvider,
+                RequestType.byTexting,
+                indicationText: textController.text,
+              );
             },
             child: const Text("Solicitar taxi"),
           ),

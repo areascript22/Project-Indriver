@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  Logger logger = Logger();
-
   // Login with email and password
-  Future<User?> loginWithEmailAndPassword(String email, String password) async {
+  static Future<User?> loginWithEmailAndPassword(
+      String email, String password) async {
+    Logger logger = Logger();
+    final FirebaseAuth auth = FirebaseAuth.instance;
     try {
       logger.f("Singing In");
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      UserCredential userCredential = await auth.signInWithEmailAndPassword(
           email: email, password: password);
       return userCredential.user;
     } catch (e) {
@@ -20,7 +20,9 @@ class AuthService {
   }
 
 // Send email verification
-  Future<void> sendVerificationEmail(User user) async {
+  static Future<void> sendVerificationEmail(User user) async {
+    Logger logger = Logger();
+
     if (!user.emailVerified) {
       try {
         await user.sendEmailVerification();
@@ -32,8 +34,10 @@ class AuthService {
   }
 
 //Send password recovery email
-  Future<void> sendPasswordRecoveryEmail(
+  static Future<void> sendPasswordRecoveryEmail(
       String email, BuildContext context) async {
+    Logger logger = Logger();
+
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       if (context.mounted) {
@@ -54,10 +58,5 @@ class AuthService {
       }
       logger.e('Failed to send password recovery email: $e');
     }
-  }
-
-  // Sign out
-  Future<void> signOut() async {
-    await _auth.signOut();
   }
 }

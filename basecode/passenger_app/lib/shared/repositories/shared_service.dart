@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -79,25 +78,48 @@ class SharedService {
   }
 
   //Upload an audio file to Storage and get its URL
-  static Future<String?> uploadAudioToFirebase(String filePath) async {
+  static Future<String?> uploadAudioToFirebase(
+      String audioFilePath, String passengerId) async {
     final logger = Logger();
-    final passengerId = FirebaseAuth.instance.currentUser?.uid;
-    if (passengerId == null) {
-      logger.e("The passenger is not autenticated.");
+    if (audioFilePath.isEmpty) {
+      logger.e("No audio file found to upload.");
       return null;
     }
+
     try {
-      final firebaseStorage = FirebaseStorage.instance;
-      final fileName = '$passengerId.aac';
-      final storageRef =
-          firebaseStorage.ref().child('audio_requests/$fileName');
-      final uploadTask = await storageRef.putFile(File(filePath));
-      final downloadURL = await storageRef.getDownloadURL();
-      return downloadURL;
+      // Get a reference to Firebase Storage
+      final storageRef = FirebaseStorage.instance.ref();
+      final audioRef = storageRef.child('audio_requests/$passengerId.aac');
+      final uploadTask = audioRef.putFile(File(audioFilePath));
+      final snapshot = await uploadTask.whenComplete(() => null);
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+
+      logger.i('Audio uploaded successfully. URL: $downloadUrl');
+      return downloadUrl;
     } catch (e) {
-      // Handle any errors that occur during upload
-      logger.e('Failed to upload audio: $e');
+      logger.e('Error uploading audio: $e');
       return null;
+    }
+  }
+
+  // Cancel driver request or delivery request when there are not drivers yet.
+  static Future<bool> removeDriverRequest(String passengerId) async {
+    final logger = Logger();
+    try {
+      final dbRef = FirebaseDatabase.instance.ref();
+      final storageRef =
+          FirebaseStorage.instance.ref('audio_requests/$passengerId.aac');
+      final path = 'driver_requests/$passengerId'; //Driver request path
+      final path2 = 'delivery_requests/$passengerId'; //Delivery request path
+      // Remove data at the specified path
+      await dbRef.child(path).remove();
+      await dbRef.child(path2).remove();
+      await storageRef.delete();
+      logger.i('Request removed successfully at $path');
+      return true;
+    } catch (e) {
+      logger.e('Error removing data: $e');
+      return false;
     }
   }
 }

@@ -3,6 +3,7 @@ import 'package:driver_app/features/auth/view/pages/auth_wrapper_page.dart';
 import 'package:driver_app/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:driver_app/features/delivery_request/viewmodel/delivery_request_viewmodel.dart';
 import 'package:driver_app/features/home/viewmodel/home_view_model.dart';
+import 'package:driver_app/features/pending_ride_request/viewmodel/pending_ride_request_viewmodel.dart';
 import 'package:driver_app/features/ride_request/viewmodel/ride_request_viewmodel.dart';
 import 'package:driver_app/firebase_options.dart';
 import 'package:driver_app/shared/providers/shared_provider.dart';
@@ -32,6 +33,9 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (context) => DeliveryRequestViewModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => PendingRideRequestViewModel(),
         ),
       ],
       child: const MyApp(),

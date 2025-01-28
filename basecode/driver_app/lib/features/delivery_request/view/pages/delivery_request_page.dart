@@ -1,8 +1,11 @@
 import 'package:driver_app/features/delivery_request/view/widgets/delivery_request_list_tile.dart';
+import 'package:driver_app/features/home/view/widgets/custom_drawe.dart';
+import 'package:driver_app/features/home/viewmodel/home_view_model.dart';
 import 'package:driver_app/shared/models/delivery_request_model.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 
 class DeliveryRequestPage extends StatefulWidget {
   const DeliveryRequestPage({super.key});
@@ -18,7 +21,10 @@ class _DeliveryRequestPageState extends State<DeliveryRequestPage> {
 
   @override
   Widget build(BuildContext context) {
+    final homeViewModel = Provider.of<HomeViewModel>(context);
     return Scaffold(
+      appBar: AppBar(),
+      drawer: const CustomDrawer(),
       body: StreamBuilder(
         stream: requestsRef.onValue,
         builder: (context, snapshot) {

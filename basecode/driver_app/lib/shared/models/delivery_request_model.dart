@@ -67,6 +67,8 @@ class PassengerInformation {
   final String name;
   final String phone;
   final String profilePicture;
+  final String audioFilePath;
+  final String indicationText;
   final String pickUpLocation;
   final String dropOffLocation;
   final LatLng pickUpCoordinates;
@@ -76,6 +78,8 @@ class PassengerInformation {
     required this.name,
     required this.phone,
     required this.profilePicture,
+    required this.audioFilePath,
+    required this.indicationText,
     required this.pickUpLocation,
     required this.dropOffLocation,
     required this.pickUpCoordinates,
@@ -88,6 +92,8 @@ class PassengerInformation {
       name: map['name'] as String,
       phone: map['phone'] as String,
       profilePicture: map['profilePicture'] as String,
+      audioFilePath: map['audioFilePath'] as String,
+      indicationText: map['indicationText'] as String,
       pickUpLocation: map['pickUpLocation'] as String,
       dropOffLocation: map['dropOffLocation'] as String,
       pickUpCoordinates: LatLng(
@@ -107,6 +113,8 @@ class PassengerInformation {
       'name': name,
       'phone': phone,
       'profilePicture': profilePicture,
+      'audioFilePath': audioFilePath,
+      'indicationText': indicationText,
       'pickUpLocation': pickUpLocation,
       'dropOffLocation': dropOffLocation,
       'pickUpCoordenates': {

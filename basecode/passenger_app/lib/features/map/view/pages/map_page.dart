@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
+import 'package:passenger_app/shared/models/request_type.dart';
 import 'package:passenger_app/shared/widgets/custom_drawer.dart';
 import 'package:passenger_app/features/map/view/widgets/circular_button.dart';
 import 'package:passenger_app/features/request_driver/view/pages/driver_bottom_card.dart';
@@ -10,6 +11,7 @@ import 'package:passenger_app/features/map/view/widgets/select_location_icon.dar
 import 'package:passenger_app/features/map/viewmodel/map_view_model.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
 import 'package:passenger_app/shared/widgets/custom_elevated_button.dart';
+import 'package:passenger_app/shared/widgets/waiting_for_drover_overlay.dart';
 import 'package:provider/provider.dart';
 
 class MapPage extends StatefulWidget {
@@ -70,6 +72,9 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
               }
             },
             onCameraMove: (position) {
+              if (sharedProvider.requestType != RequestType.byCoordinates) {
+                return;
+              }
               if (mapViewModel.enteredInSelectingLocationMode ||
                   (!mapViewModel.enteredInSelectingLocationMode &&
                       sharedProvider.dropOffCoordenates == null)) {
@@ -86,8 +91,9 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                 mapViewModel.showBottomSheetWithDelay(sharedProvider),
           ),
           //Select Location Icon
-          if (mapViewModel.enteredInSelectingLocationMode ||
-              sharedProvider.dropOffLocation == null)
+          if ((mapViewModel.enteredInSelectingLocationMode ||
+                  sharedProvider.dropOffLocation == null) &&
+              sharedProvider.requestType == RequestType.byCoordinates)
             SelectLocationIcon(
               mainIconSize: mapViewModel.mainIconSize,
               childT: mapViewModel.isMovingMap
@@ -197,36 +203,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
           // Overlay
           if (sharedProvider.deliveryLookingForDriver)
             Positioned.fill(
-              child: Container(
-                color: Colors.black
-                    .withOpacity(0.7), // Semi-transparent background
-                child: Center(
-                  child: Container(
-                    width: 400,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Buscando conductor....',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.black,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        LinearProgressIndicator(
-                          color: Colors.blue,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              child: WitingForDriverOverlay(),
             ),
         ],
       ),

@@ -1,4 +1,5 @@
 import 'package:driver_app/features/home/view/widgets/services_issues_alert.dart';
+import 'package:driver_app/features/pending_ride_request/view/pages/pending_ride_request_page.dart';
 import 'package:driver_app/features/ride_request/view/pages/ride_request_page.dart';
 import 'package:driver_app/features/delivery_request/view/pages/delivery_request_page.dart';
 import 'package:driver_app/features/home/viewmodel/home_view_model.dart';
@@ -16,6 +17,7 @@ class DriverApp extends StatefulWidget {
 
 class _DriverAppState extends State<DriverApp> with WidgetsBindingObserver {
   final logger = Logger();
+  late HomeViewModel homeViewModelToDispose;
   @override
   void initState() {
     super.initState();
@@ -24,6 +26,7 @@ class _DriverAppState extends State<DriverApp> with WidgetsBindingObserver {
     setDriverValue();
     //Call ChechGPSPermissions function
     checkGpsPermissions();
+    homeViewModelToDispose = Provider.of<HomeViewModel>(context, listen: false);
   }
 
   void setDriverValue() {
@@ -48,8 +51,8 @@ class _DriverAppState extends State<DriverApp> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    homeViewModelToDispose.clearListeners();
     super.dispose();
-    logger.i("Disposing");
   }
 
   @override
@@ -75,6 +78,7 @@ class _DriverAppState extends State<DriverApp> with WidgetsBindingObserver {
             // PermissionsPage(),
             RideMRequestPage(),
             DeliveryRequestPage(),
+            PendingRideRequestPage(),
           ],
         ),
       ]),
@@ -122,6 +126,11 @@ class _DriverAppState extends State<DriverApp> with WidgetsBindingObserver {
                     ],
                   ),
                   label: 'Órdenes',
+                ),
+                //pendin taxi requests
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.taxi_alert),
+                  label: 'vehicle',
                 ),
               ],
               selectedItemColor: Colors.blueAccent,
