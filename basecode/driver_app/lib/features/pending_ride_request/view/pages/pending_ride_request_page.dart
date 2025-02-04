@@ -1,8 +1,6 @@
-import 'package:driver_app/features/delivery_request/view/widgets/delivery_request_list_tile.dart';
-import 'package:driver_app/features/home/view/widgets/custom_drawe.dart';
+import 'package:driver_app/features/home/view/widgets/custom_drawer.dart';
 import 'package:driver_app/features/pending_ride_request/model/pending_request_model.dart';
 import 'package:driver_app/features/pending_ride_request/view/widgets/request_list_tile.dart';
-import 'package:driver_app/shared/models/delivery_request_model.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -62,7 +60,7 @@ class _PendingRideRequestPageState extends State<PendingRideRequestPage> {
             //If there is no "pending" requests
             if (entriesToBuild.isEmpty) {
               return const Center(
-                  child: Text("No hay solicitudes pendientes.."));
+                  child: Text("No hay solicitudes pendientes ..."));
             }
             //Update delivery request lenght in shared prtovider
 

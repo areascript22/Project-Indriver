@@ -1,19 +1,19 @@
 import 'package:driver_app/shared/models/delivery_request_model.dart';
 
-class Passenger {
+class PassengerRequest {
   final String passengerId;
   final String status;
   final String type;
   final PassengerInformation information;
-  Passenger({
+  PassengerRequest({
     required this.passengerId,
     required this.status,
     required this.type,
     required this.information,
   });
 
-  factory Passenger.fromMap(Map value) {
-    return Passenger(
+  factory PassengerRequest.fromMap(Map value) {
+    return PassengerRequest(
       passengerId: value['passengerId'] as String,
       status: value['status'] as String,
       type: value['type'] as String,

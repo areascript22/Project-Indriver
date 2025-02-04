@@ -22,7 +22,8 @@ class HomeViewModel extends ChangeNotifier {
   //LISTENERS
   StreamSubscription<ServiceStatus>? locationServicesAtSystemLevelListener;
   StreamSubscription<Position>? locationListener;
-  StreamSubscription<DatabaseEvent>? requestLitener;
+  StreamSubscription<DatabaseEvent>? deliveryRequestLitener;
+  StreamSubscription<DatabaseEvent>? pendingRequestsLitener;
 
   bool _locationPermissionsSystemLevel =
       true; //Location services at System level
@@ -31,6 +32,7 @@ class HomeViewModel extends ChangeNotifier {
 
   int _currentPageIndex = 0;
   int _deliveryRequestLength = 0;
+  int _pendingRequestLength = 0;
 
   //GETTERS
   bool get loading => _loading;
@@ -39,6 +41,7 @@ class HomeViewModel extends ChangeNotifier {
   bool get locationPermissionUserLevel => _locationPermissionUserLevel;
   int get currentPageIndex => _currentPageIndex;
   int get deliveryRequestLength => _deliveryRequestLength;
+  int get pendingRequestLength => _pendingRequestLength;
 
   //SETTERS
   set loading(bool value) {
@@ -71,11 +74,16 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  set pendingRequestLength(int value) {
+    _pendingRequestLength = value;
+    notifyListeners();
+  }
+
   //FUNCTIONS
   void clearListeners() {
     locationServicesAtSystemLevelListener?.cancel();
     locationListener?.cancel();
-    requestLitener?.cancel();
+    deliveryRequestLitener?.cancel();
   }
 
   //Sign out
@@ -115,8 +123,23 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   // To listen only Delivery request lenght
-  void listenToRequests(DatabaseReference requestsRef) {
-    requestLitener = requestsRef.onValue.listen((event) {
+  void listenToDeliveryRequests(DatabaseReference requestsRef) {
+    deliveryRequestLitener = requestsRef.onValue.listen((event) {
+      final data = event.snapshot.value as Map?;
+      if (data != null) {
+        // Filter pending requests
+        List<MapEntry<dynamic, dynamic>> entries = data.entries
+            .where((entry) => entry.value['status'] == 'pending')
+            .toList();
+        deliveryRequestLength = entries.length;
+      } else {
+        deliveryRequestLength = 0;
+      }
+    });
+  }
+  // To listen only pending ride request lenght
+  void listenToPendingRideRequests(DatabaseReference requestsRef) {
+    deliveryRequestLitener = requestsRef.onValue.listen((event) {
       final data = event.snapshot.value as Map?;
       if (data != null) {
         // Filter pending requests
@@ -152,32 +175,46 @@ class HomeViewModel extends ChangeNotifier {
     // Location services are enabled and app has permissions
     locationPermissionUserLevel = true;
     // _startLocationTracking(sharedProvider);
+    startLocationTracking(sharedProvider);
     return true;
   }
 
   // Function to start tracking location changes
   void startLocationTracking(SharedProvider sharedProvider) async {
+    locationListener?.cancel();
     isCurrentLocationAvailable = false;
     try {
       // Get the current location
       Position currentPosition = await Geolocator.getCurrentPosition(
-              desiredAccuracy: LocationAccuracy.medium)
+              desiredAccuracy: LocationAccuracy.low)
           .timeout(const Duration(seconds: 5));
       //Update current position in Porvider
       sharedProvider.driverCurrentPosition = currentPosition;
       //Write initial data in realtime database
       await HomeRealtimeDBService.writeOrUpdateLocationInFirebase(
           currentPosition, sharedProvider.driverModel!);
-      logger.f("Current location catched: $currentPosition");
+      logger.f("Current location catched : $currentPosition");
       isCurrentLocationAvailable = true;
     } catch (e) {
-      logger.e("Error tracking location: $e");
+      logger.e("Error tryng to Catch current location: $e");
+    }
+    //Get last known position
+    if (!isCurrentLocationAvailable) {
+      Position? cPosition = await Geolocator.getLastKnownPosition();
+      if (cPosition != null) {
+        logger.f("Last known position Catched");
+        sharedProvider.driverCurrentPosition = cPosition;
+        isCurrentLocationAvailable = true;
+        await HomeRealtimeDBService.writeOrUpdateLocationInFirebase(
+            cPosition, sharedProvider.driverModel!);
+      }
     }
     // Listen for location updates
     locationListener = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.medium,
-        distanceFilter: 1, // Minimum change (in meters) to trigger updates
+        accuracy: LocationAccuracy.low,
+
+        // distanceFilter: 1, // Minimum change (in meters) to trigger updates
       ),
     ).listen((Position position) async {
       // If location is available, update the flag to true
@@ -186,11 +223,11 @@ class HomeViewModel extends ChangeNotifier {
       await HomeRealtimeDBService.writeOrUpdateLocationInFirebase(
           position, sharedProvider.driverModel!);
       logger.f(
-          "Home View Model Location updated: ${position.latitude}, ${position.longitude}");
+          "Listener Location updated: ${position.latitude}, ${position.longitude}");
     }, onError: (error) {
       // If there is an error, update the flag to false
       isCurrentLocationAvailable = false;
-      logger.e("Error getting location: $error");
+      logger.e("Error Loistening location: $error");
     });
   }
 

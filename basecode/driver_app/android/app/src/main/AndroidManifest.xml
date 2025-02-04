@@ -6,8 +6,10 @@
 <!-- Location Package -->
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+<!-- vibration: ^3.1.0 -->
+<uses-permission android:name="android.permission.VIBRATE"/>
     <application
-        android:label="driver_app"
+        android:label="TaxiConductor"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -50,4 +52,24 @@
             <data android:mimeType="text/plain"/>
         </intent>
     </queries>
+
+        <!--BEGIN//  url_launcher: ^6.3.0 -->
+    <queries>
+    <!-- If your app checks for SMS support -->
+    <intent>
+        <action android:name="android.intent.action.VIEW" />
+        <data android:scheme="sms" />
+    </intent>
+    <!-- If your app checks for call support -->
+    <intent>
+        <action android:name="android.intent.action.VIEW" />
+        <data android:scheme="tel" />
+    </intent>
+    <!-- If your application checks for inAppBrowserView launch mode support -->
+    <intent>
+        <action android:name="android.support.customtabs.action.CustomTabsService" />
+    </intent>
+    </queries>
+     <!--END//  url_launcher: ^6.3.0 -->
+
 </manifest>

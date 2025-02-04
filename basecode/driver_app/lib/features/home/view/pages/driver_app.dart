@@ -1,3 +1,4 @@
+import 'package:driver_app/features/delivery_request/view/pages/delivery_page_wrapper.dart';
 import 'package:driver_app/features/home/view/widgets/services_issues_alert.dart';
 import 'package:driver_app/features/pending_ride_request/view/pages/pending_ride_request_page.dart';
 import 'package:driver_app/features/ride_request/view/pages/ride_request_page.dart';
@@ -39,13 +40,13 @@ class _DriverAppState extends State<DriverApp> with WidgetsBindingObserver {
   void checkGpsPermissions() async {
     final homeViewModel = Provider.of<HomeViewModel>(context, listen: false);
     final sharedProvider = Provider.of<SharedProvider>(context, listen: false);
-    homeViewModel
-        .listenToRequests(FirebaseDatabase.instance.ref('delivery_requests'));
+    homeViewModel.listenToDeliveryRequests(
+        FirebaseDatabase.instance.ref('delivery_requests'));
     bool gpsPermissions =
         await homeViewModel.checkGpsPermissions(sharedProvider);
     homeViewModel.listenToLocationServicesAtSystemLevel();
     sharedProvider.isGPSPermissionsEnabled = gpsPermissions;
-    homeViewModel.startLocationTracking(sharedProvider);
+    //  homeViewModel.startLocationTracking(sharedProvider);
     homeViewModel.setOnDisconnectHandler();
   }
 
@@ -77,8 +78,9 @@ class _DriverAppState extends State<DriverApp> with WidgetsBindingObserver {
           children: const [
             // PermissionsPage(),
             RideMRequestPage(),
-            DeliveryRequestPage(),
             PendingRideRequestPage(),
+            //DeliveryRequestPage(),
+            DeliveryPageWrapper(),
           ],
         ),
       ]),
@@ -86,6 +88,7 @@ class _DriverAppState extends State<DriverApp> with WidgetsBindingObserver {
           ? BottomNavigationBar(
               currentIndex: homeViewModel.currentPageIndex,
               onTap: (index) {
+                logger.i("Changing index to $index");
                 homeViewModel.currentPageIndex = index;
               },
               items: [
@@ -94,6 +97,13 @@ class _DriverAppState extends State<DriverApp> with WidgetsBindingObserver {
                   icon: Icon(Icons.map),
                   label: 'Mapa',
                 ),
+
+                //pendin taxi requests
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.taxi_alert),
+                  label: 'Pendientes',
+                ),
+
                 //Shpping cart icon
                 BottomNavigationBarItem(
                   icon: Stack(
@@ -126,11 +136,6 @@ class _DriverAppState extends State<DriverApp> with WidgetsBindingObserver {
                     ],
                   ),
                   label: 'Órdenes',
-                ),
-                //pendin taxi requests
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.taxi_alert),
-                  label: 'vehicle',
                 ),
               ],
               selectedItemColor: Colors.blueAccent,

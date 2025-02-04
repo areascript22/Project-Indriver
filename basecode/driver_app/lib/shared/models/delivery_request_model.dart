@@ -5,6 +5,7 @@ class DeliveryRequestModel {
   final PassengerInformation information;
   final Details details; // Adjust this type to match your details model
   final String status;
+  final String requestType;
   final String timestamp;
 
   DeliveryRequestModel({
@@ -12,6 +13,7 @@ class DeliveryRequestModel {
     required this.information,
     required this.details,
     required this.status,
+    required this.requestType,
     required this.timestamp,
   });
 
@@ -20,8 +22,9 @@ class DeliveryRequestModel {
     return DeliveryRequestModel(
       passengerId: passengerId,
       information: PassengerInformation.fromMap(map['information']),
-      details: Details.fromMap(map['details']),
+      details: Details.fromMap(map['details'] ?? {}),
       status: map['status'] as String,
+      requestType: map['requestType'],
       timestamp: map['timestamp'],
     );
   }
@@ -49,8 +52,8 @@ class Details {
   /// Factory constructor to create a DeliveryRequest from a map
   factory Details.fromMap(Map map) {
     return Details(
-      details: map['details'],
-      recipientName: map['recipientName'],
+      details: map['details'] ?? '',
+      recipientName: map['recipientName'] ?? '',
     );
   }
 
@@ -71,6 +74,7 @@ class PassengerInformation {
   final String indicationText;
   final String pickUpLocation;
   final String dropOffLocation;
+  final String requestType;
   final LatLng pickUpCoordinates;
   final LatLng dropOffCoordinates;
 
@@ -82,6 +86,7 @@ class PassengerInformation {
     required this.indicationText,
     required this.pickUpLocation,
     required this.dropOffLocation,
+    required this.requestType,
     required this.pickUpCoordinates,
     required this.dropOffCoordinates,
   });
@@ -94,8 +99,9 @@ class PassengerInformation {
       profilePicture: map['profilePicture'] as String,
       audioFilePath: map['audioFilePath'] as String,
       indicationText: map['indicationText'] as String,
-      pickUpLocation: map['pickUpLocation'] as String,
-      dropOffLocation: map['dropOffLocation'] as String,
+      pickUpLocation: map['pickUpLocation'] ?? '',
+      dropOffLocation: map['dropOffLocation'] ?? '',
+      requestType: map['requestType'] ?? '',
       pickUpCoordinates: LatLng(
         map['pickUpCoordenates']['latitude'] as double,
         map['pickUpCoordenates']['longitude'] as double,
@@ -117,6 +123,7 @@ class PassengerInformation {
       'indicationText': indicationText,
       'pickUpLocation': pickUpLocation,
       'dropOffLocation': dropOffLocation,
+      'requestType': requestType,
       'pickUpCoordenates': {
         'latitude': pickUpCoordinates.latitude,
         'longitude': pickUpCoordinates.longitude,

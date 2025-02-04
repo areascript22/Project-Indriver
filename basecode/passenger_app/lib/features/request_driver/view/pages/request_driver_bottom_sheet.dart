@@ -175,107 +175,110 @@ class _RequestDriverBottomSheetState extends State<RequestDriverBottomSheet>
       TextEditingController referenceTextController) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
-      color: const Color.fromARGB(255, 255, 255, 255),
+      // color: Color.fromARGB(255, 112, 47, 47),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           //Pick up location
-          const SizedBox(height: 10),
-          BSElevatedButton(
-            onPressed: () => showSearchBottomSheet(context, true),
-            backgroundColor: sharedViewModel.pickUpLocation == null
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.background,
-            pickUpDestination: true,
-            icon: const Icon(
-              Ionicons.location,
-              size: 20,
-              color: Colors.red,
-            ),
-            child: sharedViewModel.pickUpLocation == null
-                ? const CircularProgressIndicator()
-                : Text(
-                    sharedViewModel.pickUpLocation == null
-                        ? "Lugar de recogida"
-                        : sharedViewModel.pickUpLocation!,
+          Column(
+            children: [
+              const SizedBox(height: 10),
+              BSElevatedButton(
+                onPressed: () => showSearchBottomSheet(context, true),
+                backgroundColor: sharedViewModel.pickUpLocation == null
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.background,
+                pickUpDestination: true,
+                icon: const Icon(
+                  Ionicons.location,
+                  size: 20,
+                  color: Colors.green,
+                ),
+                child: sharedViewModel.pickUpLocation == null
+                    ? const CircularProgressIndicator()
+                    : Text(
+                        sharedViewModel.pickUpLocation == null
+                            ? "Lugar de recogida"
+                            : sharedViewModel.pickUpLocation!,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+              ),
+              const SizedBox(height: 5),
+
+              //Destination Location
+              BSElevatedButton(
+                onPressed: () => showSearchBottomSheet(context, false),
+                backgroundColor: sharedViewModel.dropOffLocation == null
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.background,
+                pickUpDestination: false,
+                icon: sharedViewModel.dropOffLocation == null
+                    ? const Icon(
+                        Ionicons.search,
+                        size: 20,
+                        color: Colors.black54,
+                      )
+                    : const Icon(
+                        Ionicons.location,
+                        size: 20,
+                        color: Colors.blue,
+                      ),
+                child: Expanded(
+                  child: Text(
+                    sharedViewModel.dropOffLocation == null
+                        ? "Destino"
+                        : sharedViewModel.dropOffLocation!,
                     style: Theme.of(context).textTheme.bodyLarge,
                     overflow: TextOverflow.ellipsis,
                   ),
-          ),
-          const SizedBox(height: 5),
-
-          //Destination Location
-          BSElevatedButton(
-            onPressed: () => showSearchBottomSheet(context, false),
-            backgroundColor: sharedViewModel.dropOffLocation == null
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.background,
-            pickUpDestination: false,
-            icon: sharedViewModel.dropOffLocation == null
-                ? const Icon(
-                    Ionicons.search,
-                    size: 20,
-                    color: Colors.black54,
-                  )
-                : const Icon(
-                    Ionicons.location,
-                    size: 20,
-                    color: Colors.green,
-                  ),
-            child: Expanded(
-              child: Text(
-                sharedViewModel.dropOffLocation == null
-                    ? "Destino"
-                    : sharedViewModel.dropOffLocation!,
-                style: Theme.of(context).textTheme.bodyLarge,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-          const SizedBox(height: 5),
-          //Estimated time
-          // if (estimatedtime)
-          if (sharedViewModel.duration != null)
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(9),
-                color: Theme.of(context).cardColor,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(7.0),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Ionicons.information_circle_outline,
-                      color: Colors.blue,
-                    ),
-                    const SizedBox(width: 10),
-                    Text("Tiempo de viaje ~ ${sharedViewModel.duration}"),
-                  ],
                 ),
               ),
-            ),
-          const SizedBox(height: 5),
-          // CustomElevatedButton(
-          //   onTap: () {
-          //     showStarRatingsBottomSheet(context, '');
-          //   },
-          //   child: const Text("Test rating stars"),
-          // ),
-          BSTextField(
-            textEditingController: referenceTextController,
-            hintText: "Referencia....",
-            leftIcon: Ionicons.reader,
-            rightIcon: Ionicons.pencil,
+              const SizedBox(height: 5),
+              //Estimated time
+              // if (estimatedtime)
+              if (sharedViewModel.duration != null)
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(9),
+                    color: Theme.of(context).cardColor,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(7.0),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Ionicons.information_circle_outline,
+                          color: Colors.blue,
+                        ),
+                        const SizedBox(width: 10),
+                        Text("Tiempo de viaje ~ ${sharedViewModel.duration}"),
+                      ],
+                    ),
+                  ),
+                ),
+              // const SizedBox(height: 5),
+              // BSTextField(
+              //   textEditingController: referenceTextController,
+              //   hintText: "Referencia....",
+              //   leftIcon: Ionicons.reader,
+              //   rightIcon: Ionicons.pencil,
+              // ),
+            ],
           ),
-          const SizedBox(height: 5),
 
           //Request Taxi
-          CustomElevatedButton(
-            onTap: sharedViewModel.polylineFromPickUpToDropOff.points.isNotEmpty
-                ? () => requestDriverViewModel.requestTaxi(
-                    context, sharedViewModel, RequestType.byCoordinates)
-                : null,
-            child: const Text("Solicitar taxi"),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: CustomElevatedButton(
+              onTap:
+                  sharedViewModel.polylineFromPickUpToDropOff.points.isNotEmpty
+                      ? () => requestDriverViewModel.requestTaxi(
+                          context, sharedViewModel, RequestType.byCoordinates)
+                      : null,
+              child: const Text("Solicitar taxi"),
+            ),
           ),
         ],
       ),

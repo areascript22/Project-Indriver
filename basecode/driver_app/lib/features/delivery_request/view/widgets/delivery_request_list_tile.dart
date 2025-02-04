@@ -1,6 +1,8 @@
 import 'package:driver_app/features/delivery_request/viewmodel/delivery_request_viewmodel.dart';
 import 'package:driver_app/shared/models/delivery_request_model.dart';
+import 'package:driver_app/shared/models/request_type.dart';
 import 'package:driver_app/shared/providers/shared_provider.dart';
+import 'package:driver_app/features/delivery_request/view/widgets/delivery_request_type.dart';
 import 'package:flutter/material.dart';
 
 import 'package:ionicons/ionicons.dart';
@@ -26,8 +28,8 @@ class DeliveryRequestListTile extends StatelessWidget {
         deliveryRequestViewModel.deliveryRequestModel = deliveryRequestModel;
         //    sharedProvider.passengerInformation = deliveryRequestModel.information;
         //Write driver data in realtime database
-        await deliveryRequestViewModel.writeDriverDataUnderDeliveryRequest(
-            sharedProvider, context);
+        await deliveryRequestViewModel
+            .writeDriverDataUnderDeliveryRequest(sharedProvider);
         //Navigate to map page, display info and start navigating
       },
       child: Padding(
@@ -85,6 +87,9 @@ class DeliveryRequestListTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    //reqeust type
+                    DeliveryRequestTypeCard(
+                        requestType: deliveryRequestModel.requestType),
                     Text(
                       deliveryRequestModel.information.pickUpLocation,
                       style: const TextStyle(fontWeight: FontWeight.bold),

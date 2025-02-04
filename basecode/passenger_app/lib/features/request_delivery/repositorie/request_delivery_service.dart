@@ -9,8 +9,11 @@ class RequestDeliveryService {
   static Future<bool> writeToDatabase({
     required String passengerId,
     required PassengerModel passengerModel,
-    required DeliveryDetailsModel model,
+    required String requestType,
+    DeliveryDetailsModel? deliveryDetails,
     required SharedProvider sharedProvider,
+    String? audioFilePath,
+    String? indicationText,
   }) async {
     final Logger logger = Logger();
     try {
@@ -30,20 +33,31 @@ class RequestDeliveryService {
             'profilePicture': passengerModel.profilePicture,
             'pickUpLocation': sharedProvider.pickUpLocation,
             'dropOffLocation': sharedProvider.dropOffLocation,
+            'audioFilePath': audioFilePath ?? '',
+            'indicationText': indicationText ?? '',
             "pickUpCoordenates": {
-              "latitude": sharedProvider.pickUpCoordenates!.latitude,
-              "longitude": sharedProvider.pickUpCoordenates!.longitude, 
+              "latitude": sharedProvider.pickUpCoordenates != null
+                  ? sharedProvider.pickUpCoordenates!.latitude
+                  : 0.1, //To make sure that the data that will be updated are Double
+              "longitude": sharedProvider.pickUpCoordenates != null
+                  ? sharedProvider.pickUpCoordenates!.longitude
+                  : 0.1,
             },
             "dropOffCoordenates": {
-              "latitude": sharedProvider.dropOffCoordenates!.latitude,
-              "longitude": sharedProvider.dropOffCoordenates!.longitude,
+              "latitude": sharedProvider.dropOffCoordenates != null
+                  ? sharedProvider.dropOffCoordenates!.latitude
+                  : 0.1,
+              "longitude": sharedProvider.dropOffCoordenates != null
+                  ? sharedProvider.dropOffCoordenates!.longitude
+                  : 0.1,
             },
           },
-          'details': model.toMap(),
+          'details': deliveryDetails != null ? deliveryDetails.toMap() : null,
           'status': 'pending',
+          'requestType': requestType,
           'timestamp': timestamp, // Add sortable timestamp here
         },
-      );
+      ).timeout(const Duration(seconds: 7));
 
       logger.i(
           'Delivery request written successfully for passenger ID: $passengerId');

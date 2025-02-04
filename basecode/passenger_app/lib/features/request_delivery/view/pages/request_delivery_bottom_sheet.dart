@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:logger/logger.dart';
+import 'package:passenger_app/features/request_delivery/view/widgets/by_audio_delivery_request.dart';
+import 'package:passenger_app/features/request_delivery/view/widgets/by_coords_delivery_request.dart';
+import 'package:passenger_app/features/request_delivery/view/widgets/by_text_delivery_request.dart';
 import 'package:passenger_app/features/request_delivery/viewmodel/delivery_request_viewmodel.dart';
-import 'package:passenger_app/shared/widgets/bs_elevated_button.dart';
+import 'package:passenger_app/shared/models/request_type.dart';
 import 'package:passenger_app/shared/widgets/custom_image_button.dart';
-import 'package:passenger_app/features/request_delivery/view/widgets/delivery_details_bottom_sheet.dart';
-import 'package:passenger_app/features/request_delivery/view/widgets/delivery_details_button.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
 import 'package:passenger_app/shared/widgets/custom_circular_button.dart';
-import 'package:passenger_app/shared/widgets/search_locations_bottom_sheet.dart';
-import 'package:passenger_app/shared/widgets/custom_elevated_button.dart';
 import 'package:provider/provider.dart';
 
 class RequestDeliveryBottomSheet extends StatefulWidget {
@@ -21,8 +20,9 @@ class RequestDeliveryBottomSheet extends StatefulWidget {
       _RequestDeliveryBottomSheetState();
 }
 
-class _RequestDeliveryBottomSheetState
-    extends State<RequestDeliveryBottomSheet> {
+class _RequestDeliveryBottomSheetState extends State<RequestDeliveryBottomSheet>
+    with SingleTickerProviderStateMixin {
+  final logger = Logger();
   final bool estimatedtime = false;
   int selectedIndex = 0; // Tracks the currently selected button index
   final List<Map> imagePaths = [
@@ -30,6 +30,40 @@ class _RequestDeliveryBottomSheetState
     {'path': 'assets/img/car.png', 'title': 'Carreras'},
   ];
   bool showEncompleteFieldError = false;
+  late TabController _tabController;
+  late DeliveryRequestViewModel? viewMdelToDispose;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+
+    initializeValues();
+  }
+
+  void initializeValues() {
+    final sharedProvider = Provider.of<SharedProvider>(context, listen: false);
+    viewMdelToDispose =
+        Provider.of<DeliveryRequestViewModel>(context, listen: false);
+    switch (sharedProvider.requestType) {
+      case RequestType.byCoordinates:
+        _tabController.index = 0;
+        break;
+      case RequestType.byRecordedAudio:
+        _tabController.index = 1;
+        break;
+      case RequestType.byTexting:
+        _tabController.index = 2;
+        break;
+      default:
+    }
+  }
+
+  @override
+  void dispose() {
+    viewMdelToDispose!.clearListeners();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,91 +110,48 @@ class _RequestDeliveryBottomSheetState
                       );
                     }),
                   ),
-                  //Pick up location
-                  const SizedBox(height: 10),
-                  BSElevatedButton(
-                    onPressed: () => showSearchBottomSheet(context, true),
-                    backgroundColor: sharedProvider.pickUpLocation == null
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.background,
-                    pickUpDestination: true,
-                    icon: const Icon(
-                      Ionicons.location,
-                      size: 30,
-                      color: Colors.red,
-                    ),
-                    child: sharedProvider.pickUpLocation == null
-                        ? const CircularProgressIndicator()
-                        : Text(
-                            sharedProvider.pickUpLocation == null
-                                ? "Lugar de recogida"
-                                : sharedProvider.pickUpLocation!,
-                            style: Theme.of(context).textTheme.bodyLarge,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  //Destination Location
-                  BSElevatedButton(
-                    onPressed: () => showSearchBottomSheet(context, false),
-                    backgroundColor: sharedProvider.dropOffLocation == null
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.background,
-                    pickUpDestination: false,
-                    icon: sharedProvider.dropOffLocation == null
-                        ? const Icon(
-                            Ionicons.search,
-                            size: 30,
-                            color: Colors.black54,
-                          )
-                        : const Icon(
-                            Ionicons.location,
-                            size: 30,
-                            color: Colors.green,
-                          ),
-                    child: Text(
-                      sharedProvider.dropOffLocation == null
-                          ? "Destino"
-                          : sharedProvider.dropOffLocation!,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-
-                  //Delivery Details
-                  const SizedBox(height: 15),
-                  DeliveryDetailsButton(
-                    onPressed: () => showDeliveryDetailsBottomSheet(context),
-                  ),
-                  //Uncomplete fields message
-                  if (showEncompleteFieldError)
-                    const Text(
-                      "Por favor, complete todos los campos",
-                      style: TextStyle(color: Colors.red),
-                    ),
-
-                  //Request Delivery Button
-                  const SizedBox(height: 10),
-                  CustomElevatedButton(
-                    onTap: () {
-                      //Chech if all field are completed
-                      setState(() {
-                        showEncompleteFieldError = (sharedProvider
-                                .polylineFromPickUpToDropOff.points.isEmpty ||
-                            deliveryRequestViewModel.deliveryDetailsModel ==
-                                null);
-                      });
-                      print(
-                          "showEncompleteFieldError : $showEncompleteFieldError ");
-                      if (showEncompleteFieldError) return;
-                      //Write data in Realtime Database
-                      deliveryRequestViewModel
-                          .writeDeliveryRequest(sharedProvider);
+                  //OPTIONS: Coordenates, voice and text
+                  TabBar(
+                    controller: _tabController,
+                    labelColor: Colors.blue,
+                    unselectedLabelColor: Colors.grey,
+                    indicatorColor: Colors.blue,
+                    labelStyle: const TextStyle(fontSize: 15),
+                    unselectedLabelStyle: const TextStyle(fontSize: 10),
+                    tabs: const [
+                      Tab(text: 'Por mapa'),
+                      Tab(text: 'Por micrófono'),
+                      Tab(text: 'Por texto'),
+                    ],
+                    onTap: (value) {
+                      switch (value) {
+                        case 0:
+                          sharedProvider.requestType =
+                              RequestType.byCoordinates;
+                          break;
+                        case 1:
+                          sharedProvider.requestType =
+                              RequestType.byRecordedAudio;
+                          break;
+                        case 2:
+                          sharedProvider.requestType = RequestType.byTexting;
+                          break;
+                        default:
+                      }
                     },
-                    child: deliveryRequestViewModel.loading
-                        ? const CircularProgressIndicator()
-                        : const Text("Solicitar enconmienda"),
+                  ),
+
+                  //TABBAR CONTENT
+                  SizedBox(
+                    height: 290, // Set a fixed height
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        ByCoordDeliveryRequest(),
+                        ByAudioDeliveryRequest(),
+                        ByTextDeliveryRequest(requesFunction: () {}),
+                      ],
+                    ),
                   ),
                 ],
               ),

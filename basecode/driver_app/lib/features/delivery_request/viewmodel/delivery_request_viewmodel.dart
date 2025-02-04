@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:driver_app/core/utils/toast_message_util.dart';
 import 'package:driver_app/features/delivery_request/model/delivery_status.dart';
 import 'package:driver_app/features/delivery_request/repositorie/delivery_request_service.dart';
 import 'package:driver_app/features/delivery_request/view/pages/delivery_map_page.dart';
@@ -8,6 +9,7 @@ import 'package:driver_app/shared/models/delivery_request_model.dart';
 import 'package:driver_app/shared/models/route_info.dart';
 import 'package:driver_app/shared/providers/shared_provider.dart';
 import 'package:driver_app/shared/repositorie/shared_service.dart';
+import 'package:driver_app/shared/utils/shared_util.dart';
 import 'package:driver_app/shared/widgets/loading_overlay.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -20,6 +22,7 @@ import 'package:map_launcher/map_launcher.dart';
 class DeliveryRequestViewModel extends ChangeNotifier {
   final String apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
   final Logger logger = Logger();
+  final SharedUtil sharedUtil = SharedUtil();
   bool _loading = true;
   DeliveryRequestModel? deliveryRequestModel;
   String _driverDeliveryStatus = '';
@@ -30,11 +33,14 @@ class DeliveryRequestViewModel extends ChangeNotifier {
   Marker _carMarker = const Marker(markerId: MarkerId('car_marker'));
   BitmapDescriptor? _carIcon;
   String? _mapMessages;
+  BuildContext? deliveryRequestPageContext;
 
   //for listeners
   StreamSubscription<DatabaseEvent>? driverPositionListener;
   StreamSubscription<DatabaseEvent>? passengerRequestListener;
   StreamSubscription<DatabaseEvent>? driverStatusListener;
+  //To  avigate between delivery pages
+  int _deliveryPageIndex = 0;
 
   //GETTERS
   bool get loading => _loading;
@@ -44,6 +50,7 @@ class DeliveryRequestViewModel extends ChangeNotifier {
   Set<Marker> get markers => _markers;
   Marker get carMarker => _carMarker;
   String? get mapMessages => _mapMessages;
+  int get deliveryPageIndex => _deliveryPageIndex;
 
   //SETTERS
   set loading(bool value) {
@@ -81,6 +88,11 @@ class DeliveryRequestViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  set deliveryPageIndex(int value) {
+    _deliveryPageIndex = value;
+    notifyListeners();
+  }
+
   //FUNCTIONS
   void cancelListeners() {
     driverPositionListener?.cancel();
@@ -90,7 +102,7 @@ class DeliveryRequestViewModel extends ChangeNotifier {
 
   //Write Our data into Delivery Request
   Future<void> writeDriverDataUnderDeliveryRequest(
-      SharedProvider sharedProvider, BuildContext context) async {
+      SharedProvider sharedProvider) async {
     loading = true;
     String? driverId = FirebaseAuth.instance.currentUser?.uid;
     if (driverId == null) {
@@ -101,18 +113,18 @@ class DeliveryRequestViewModel extends ChangeNotifier {
         deliveryRequestModel!.passengerId,
         sharedProvider.driverCurrentPosition!,
         sharedProvider.driverModel!);
-    loading = false;
-
-    if (dataWritten) {
+    if (dataWritten && deliveryRequestPageContext != null) {
+      await sharedUtil.makePhoneVibrate();
       //Navigate to map delivery page
-      if (context.mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const DeliveryMapPage(),
-          ),
-        );
-      }
+      // if (deliveryRequestPageContext!.mounted) {
+      //   Navigator.push(
+      //     deliveryRequestPageContext!,
+      //     MaterialPageRoute(
+      //       builder: (context) => const DeliveryMapPage(),
+      //     ),
+      //   );
+      // }
+      deliveryPageIndex = 1;
       //Update Markers
       markers.add(
         Marker(
@@ -139,7 +151,9 @@ class DeliveryRequestViewModel extends ChangeNotifier {
     } else {
       deliveryRequestModel = null;
       //  sharedProvider.passengerInformation = null;
+      ToastMessageUtil.showToast("Pedido expirado");
     }
+    loading = false;
   }
 
   //Show available maps
@@ -322,10 +336,7 @@ class DeliveryRequestViewModel extends ChangeNotifier {
         deliveryRequestModel!.passengerId);
 
     //show star ratings and Pop this page
-    if (context.mounted) {
-      Navigator.pop(context);
-      showDeliveryStarRating(context);
-    }
+    deliveryPageIndex = 0;
     overlayEntry.remove();
   }
 }

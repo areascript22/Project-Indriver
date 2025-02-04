@@ -5,6 +5,7 @@ import 'package:driver_app/features/ride_request/view/widgets/by_text_info.dart'
 import 'package:driver_app/features/ride_request/viewmodel/ride_request_viewmodel.dart';
 import 'package:driver_app/shared/models/driver.dart';
 import 'package:driver_app/shared/models/request_type.dart';
+import 'package:driver_app/shared/utils/shared_util.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +18,7 @@ class PassengerInfoCard extends StatefulWidget {
 }
 
 class _PassengerInfoCardState extends State<PassengerInfoCard> {
+  final sharedUtil = SharedUtil();
   @override
   Widget build(BuildContext context) {
     final rideRequestViewModel = Provider.of<RideRequestViewModel>(context);
@@ -105,7 +107,15 @@ class _PassengerInfoCardState extends State<PassengerInfoCard> {
                           //   icon: const Icon(Ionicons.chatbox_ellipses_outline),
                           // ),
                           IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              if (rideRequestViewModel.passengerInformation !=
+                                  null) {
+                                sharedUtil.sendSMS(
+                                    rideRequestViewModel
+                                        .passengerInformation!.phone,
+                                    '');
+                              }
+                            },
                             icon: const Icon(Ionicons.call_outline),
                           ),
                         ],

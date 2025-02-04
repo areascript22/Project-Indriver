@@ -1,21 +1,23 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_app/features/ride_request/repository/ride_request_service.dart';
+import 'package:driver_app/features/ride_request/utils/ride_history_util.dart';
 import 'package:driver_app/features/ride_request/view/widgets/bottom_sheeet_star_ratings.dart';
 import 'package:driver_app/shared/models/delivery_request_model.dart';
 import 'package:driver_app/shared/models/driver.dart';
-import 'package:driver_app/shared/models/passenger.dart';
+import 'package:driver_app/shared/models/passenger_request.dart';
 import 'package:driver_app/shared/models/request_type.dart';
 import 'package:driver_app/shared/models/ride_history_model.dart';
 import 'package:driver_app/shared/models/route_info.dart';
 import 'package:driver_app/shared/providers/shared_provider.dart';
 import 'package:driver_app/shared/repositorie/shared_service.dart';
+import 'package:driver_app/shared/utils/shared_util.dart';
 import 'package:driver_app/shared/widgets/loading_overlay.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
 
@@ -23,6 +25,7 @@ class RideRequestViewModel extends ChangeNotifier {
   final String apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
   final Logger logger = Logger();
   final RideRequestService realtimeDBService = RideRequestService();
+  final SharedUtil sharedUtil = SharedUtil();
   BuildContext? rideRequestPageContext;
   //For map
   Completer<GoogleMapController> mapController = Completer();
@@ -31,7 +34,7 @@ class RideRequestViewModel extends ChangeNotifier {
   Set<Marker> _markers = {};
   PassengerInformation? _passengerInformation;
   String? passengerId;
-  Passenger? _secondPassenger;
+  PassengerRequest? _secondPassenger;
   String _driverRideStatus = '';
 
   //For Driver Queue Positions
@@ -50,15 +53,20 @@ class RideRequestViewModel extends ChangeNotifier {
   StreamSubscription<DatabaseEvent>? secondPassengerRequestListener;
   StreamSubscription<DatabaseEvent>? driverStatusListener;
 
+  //For icons
+  BitmapDescriptor? taxiIcon;
+  Marker? _taxiMarker;
+
   //GETTERS
   bool get driverInQueue => _driverInQueue;
   int? get currenQueuePoosition => _currenQueuePoosition;
   Polyline get polylineFromPickUpToDropOff => _polylineFromPickUpToDropOff;
   Set<Marker> get markers => _markers;
   PassengerInformation? get passengerInformation => _passengerInformation;
-  Passenger? get secondPassenger => _secondPassenger;
+  PassengerRequest? get secondPassenger => _secondPassenger;
   String get driverRideStatus => _driverRideStatus;
   String? get requestType => _requestType;
+  Marker? get taxiMarker => _taxiMarker;
 
   //SETTERS
   set driverInQueue(bool value) {
@@ -86,7 +94,7 @@ class RideRequestViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  set secondPassenger(Passenger? value) {
+  set secondPassenger(PassengerRequest? value) {
     _secondPassenger = value;
     notifyListeners();
   }
@@ -101,6 +109,11 @@ class RideRequestViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  set taxiMarker(Marker? value) {
+    _taxiMarker = value;
+    notifyListeners();
+  }
+
   //Functinons
   void cancelListeners() {
     driverPositionListener?.cancel();
@@ -110,12 +123,35 @@ class RideRequestViewModel extends ChangeNotifier {
   }
 
   //FUNCTIONS
+
+  Future<void> animateToLocation(Position target) async {
+    if (!mapController.isCompleted) {
+      return;
+    }
+    // Ensure the controller is available
+
+    final GoogleMapController controller = await mapController.future;
+    await controller.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng(target.latitude, target.longitude),
+          zoom: 15.0,
+        ),
+      ),
+    );
+  }
+
   //On map created
-  void onMapCreated(
-      GoogleMapController controller, SharedProvider sharedProvider) async {
+  void onMapCreated(GoogleMapController controller) async {
     if (!mapController.isCompleted) {
       mapController.complete(controller);
     }
+  }
+
+  //Icons
+  void loadIcons() async {
+    taxiIcon = await RideHistoryUtil.convertImageToBitmapDescriptor(
+        'assets/img/taxi.png');
   }
 
   //LISTENER: To Redraw route when there is passenger info
@@ -132,11 +168,20 @@ class RideRequestViewModel extends ChangeNotifier {
       driverPositionListener = databaseRef.onValue.listen((event) async {
         //Check if there is any data
         if (event.snapshot.exists) {
+          //get coordinates
+          final coords = event.snapshot.value as Map;
+          final LatLng driverCoords = LatLng(
+              coords['latitude'].toDouble(), coords['longitude'].toDouble());
+          //Update our Icon
+          if (taxiIcon != null) {
+            taxiMarker = Marker(
+                markerId: const MarkerId("taxi_marker"),
+                position: driverCoords,
+                icon: taxiIcon!);
+          }
+
+          //When There is a passenger
           if (passengerInformation != null) {
-            //get coordinates
-            final coords = event.snapshot.value as Map;
-            final LatLng driverCoords = LatLng(
-                coords['latitude'].toDouble(), coords['longitude'].toDouble());
             //Draw Polyline
             LatLng destination = passengerInformation!.dropOffCoordinates;
             if (driverRideStatus == DriverRideStatus.goingToPickUp) {
@@ -210,7 +255,8 @@ class RideRequestViewModel extends ChangeNotifier {
                 ),
               );
             }
-
+            //Play sound
+            sharedUtil.playAudio('sounds/nuevo_pedido.mp3');
             //Free up driver position in Queue
             freeUpDriverPositionInQueue();
           } catch (e) {
@@ -241,8 +287,8 @@ class RideRequestViewModel extends ChangeNotifier {
         try {
           // Get the status value
           final dataCatched = event.snapshot.value as Map;
-          final Passenger tempPassengerInformation =
-              Passenger.fromMap(dataCatched);
+          final PassengerRequest tempPassengerInformation =
+              PassengerRequest.fromMap(dataCatched);
           //Update passenger information
           secondPassenger = tempPassengerInformation;
 
@@ -333,24 +379,30 @@ class RideRequestViewModel extends ChangeNotifier {
     }
     if (passengerId == null) {
       logger.e("There is not passenger");
+      return;
     }
-
-    RideHistoryModel rideHistory = RideHistoryModel(
-      driverId: driverId,
-      passengerId: passengerId!,
-      pickupCoords: passengerInformation!.pickUpCoordinates,
-      dropoffCoords: passengerInformation!.dropOffCoordinates,
-      pickUpLocation: passengerInformation!.pickUpLocation,
-      dropOffLocation: passengerInformation!.dropOffLocation,
-      startTime: Timestamp.now(),
-      endTime: Timestamp.now(),
-      distance: 0.1,
-      driverName: sharedProvider.driverModel!.name,
-      passengerName: passengerInformation!.name,
-      status: driverRideStatus,
-      requestType: requestType!,
-    );
-    await RideRequestService.uploadRideHistory(rideHistory);
+    try {
+      RideHistoryModel rideHistory = RideHistoryModel(
+        driverId: driverId,
+        passengerId: passengerId!,
+        pickupCoords: passengerInformation!.pickUpCoordinates,
+        dropoffCoords: passengerInformation!.dropOffCoordinates,
+        pickUpLocation: passengerInformation!.pickUpLocation,
+        dropOffLocation: passengerInformation!.dropOffLocation,
+        startTime: Timestamp.now(),
+        endTime: Timestamp.now(),
+        distance: 0.1,
+        driverName: sharedProvider.driverModel!.name,
+        passengerName: passengerInformation!.name,
+        status: driverRideStatus,
+        requestType: requestType!,
+        audioFilePath: passengerInformation!.audioFilePath,
+        indicationText: passengerInformation!.indicationText,
+      );
+      await RideRequestService.uploadRideHistory(rideHistory);
+    } catch (e) {
+      logger.e("Error trying to save ride history: $e");
+    }
   }
 
   //Update 'status' field under 'drivers/driverID/status'

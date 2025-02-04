@@ -44,7 +44,6 @@ class _ByAudioInfoState extends State<ByAudioInfo> {
   }
 
   Future<void> _playAudio(RideRequestViewModel rideRequestViewModel) async {
-    logger.i("message  ${rideRequestViewModel.byAudioIndicationsURL}");
     if (rideRequestViewModel.byAudioIndicationsURL.isEmpty) {
       logger.e(
           "Audio URL is empty: ${rideRequestViewModel.byAudioIndicationsURL}.aac");

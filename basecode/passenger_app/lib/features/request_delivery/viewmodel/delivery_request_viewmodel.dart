@@ -10,10 +10,12 @@ import 'package:passenger_app/features/request_delivery/model/delivery_details_m
 import 'package:passenger_app/features/request_delivery/repositorie/request_delivery_service.dart';
 import 'package:passenger_app/features/request_delivery/view/widgets/delivery_arrived_bottom_sheet.dart';
 import 'package:passenger_app/features/request_delivery/view/widgets/driver_has_package_bottom_sheet.dart';
+import 'package:passenger_app/features/request_driver/view/widgets/star_ratings_bottom_sheet.dart';
 import 'package:passenger_app/shared/models/driver_model.dart';
 import 'package:passenger_app/shared/models/route_info.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
 import 'package:passenger_app/shared/repositories/shared_service.dart';
+import 'package:passenger_app/shared/widgets/loading_overlay.dart';
 
 class DeliveryRequestViewModel extends ChangeNotifier {
   final String apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
@@ -42,23 +44,49 @@ class DeliveryRequestViewModel extends ChangeNotifier {
   }
 
   //FUNCTIONS
+  void clearListeners() {
+    driverStatusListener?.cancel();
+    driverAcceptanceListener?.cancel();
+    driverPositionListener?.cancel();
+  }
+
   // Function to call the static method to write data to Firebase
-  Future<void> writeDeliveryRequest(SharedProvider sharedProvider) async {
+  Future<void> writeDeliveryRequest(
+    BuildContext context,
+    SharedProvider sharedProvider,
+    String requestType, {
+    String? audioFilePath,
+    String? indicationText,
+  }) async {
+    final overlay = Overlay.of(context);
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => const LoadingOverlay(),
+    );
+    overlay.insert(overlayEntry);
+
     // Create a DeliveryDetailsModel instance
     try {
       loading = true;
       //get Passenger id
       String passengerId = FirebaseAuth.instance.currentUser!.uid;
 
-      final deliveryDetails = DeliveryDetailsModel(
-        recipientName: deliveryDetailsModel!.recipientName,
-        details: deliveryDetailsModel!.details,
-      );
+      // final DeliveryDetailsModel? deliveryDetails;
+      // if(deliveryDetailsModel!=null){
+      //   deliveryDetails = DeliveryDetailsModel(
+      //   recipientName: deliveryDetailsModel!.recipientName,
+      //   details: deliveryDetailsModel!.details,
+      // );
+      // }
+
       bool dataWritten = await RequestDeliveryService.writeToDatabase(
-          passengerId: passengerId,
-          model: deliveryDetails,
-          passengerModel: sharedProvider.passengerModel!,
-          sharedProvider: sharedProvider);
+        requestType: requestType,
+        passengerId: passengerId,
+        deliveryDetails: deliveryDetailsModel,
+        passengerModel: sharedProvider.passengerModel!,
+        sharedProvider: sharedProvider,
+        audioFilePath: audioFilePath,
+        indicationText: indicationText,
+      );
       //Start Listener
       if (dataWritten) {
         _listenToDriverAcceptance(passengerId, sharedProvider);
@@ -68,6 +96,7 @@ class DeliveryRequestViewModel extends ChangeNotifier {
     } catch (e) {
       logger.e("Error while writter delivery erquest: $e");
     }
+    overlayEntry.remove();
   }
 
   //LISTENER: To listen when a driver accept our delivery request
@@ -135,10 +164,39 @@ class DeliveryRequestViewModel extends ChangeNotifier {
               }
               break;
             case DeliveryStatus.arrivedToTheDeliveryPoint:
-            sharedProvider.deliveryStatus = DeliveryStatus.arrivedToTheDeliveryPoint;
+              sharedProvider.deliveryStatus =
+                  DeliveryStatus.arrivedToTheDeliveryPoint;
               if (sharedProvider.mapPageContext != null) {
                 showDeliveryArrivedBottomSheet(sharedProvider.mapPageContext!);
               }
+              break;
+            case DeliveryStatus.finished:
+              sharedProvider.deliveryStatus = DeliveryStatus.finished;
+
+              //Rate the driver
+              showStarRatingsBottomSheet(sharedProvider.mapPageContext!,
+                  sharedProvider.driverModel!.id);
+
+              //Return to normal state of the appp
+              sharedProvider.driverModel = null;
+
+              sharedProvider.dropOffCoordenates = null;
+
+              sharedProvider.dropOffLocation = null;
+
+              sharedProvider.pickUpCoordenates = null;
+
+              sharedProvider.pickUpLocation = null;
+
+              sharedProvider.selectingPickUpOrDropOff = true;
+
+              sharedProvider.duration = null;
+
+              sharedProvider.markers.clear();
+
+              sharedProvider.polylineFromPickUpToDropOff =
+                  const Polyline(polylineId: PolylineId("default"));
+
               break;
             default:
               logger.e("Driver Status not found..");
@@ -196,5 +254,25 @@ class DeliveryRequestViewModel extends ChangeNotifier {
     } catch (e) {
       logger.e('Error listening to driver coordinates: $e');
     }
+  }
+
+  //Upload recorded audio to Firestore Storage
+  Future<String?> uploadRecordedAudioToStorage(
+      String audioFilePath, BuildContext context) async {
+    final overlay = Overlay.of(context);
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => const LoadingOverlay(),
+    );
+    overlay.insert(overlayEntry);
+    ////
+    final passengerId = FirebaseAuth.instance.currentUser?.uid;
+    if (passengerId == null) {
+      logger.e("Error: Passenger is not authenticated.");
+      return null;
+    }
+    String? response =
+        await SharedService.uploadAudioToFirebase(audioFilePath, passengerId);
+    overlayEntry.remove();
+    return response;
   }
 }

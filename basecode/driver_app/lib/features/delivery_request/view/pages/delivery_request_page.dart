@@ -1,6 +1,6 @@
 import 'package:driver_app/features/delivery_request/view/widgets/delivery_request_list_tile.dart';
-import 'package:driver_app/features/home/view/widgets/custom_drawe.dart';
-import 'package:driver_app/features/home/viewmodel/home_view_model.dart';
+import 'package:driver_app/features/delivery_request/viewmodel/delivery_request_viewmodel.dart';
+import 'package:driver_app/features/home/view/widgets/custom_drawer.dart';
 import 'package:driver_app/shared/models/delivery_request_model.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -20,10 +20,23 @@ class _DeliveryRequestPageState extends State<DeliveryRequestPage> {
   final logger = Logger();
 
   @override
+  void initState() {
+    super.initState();
+    final deliveryRequestViewModel =
+        Provider.of<DeliveryRequestViewModel>(context, listen: false);
+    deliveryRequestViewModel.deliveryRequestPageContext = context;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final homeViewModel = Provider.of<HomeViewModel>(context);
+    //final homeViewModel = Provider.of<HomeViewModel>(context);
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text(
+          "Lista de pedidos",
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      ),
       drawer: const CustomDrawer(),
       body: StreamBuilder(
         stream: requestsRef.onValue,
@@ -61,8 +74,7 @@ class _DeliveryRequestPageState extends State<DeliveryRequestPage> {
             });
             //If there is no "pending" requests
             if (entriesToBuild.isEmpty) {
-              return const Center(
-                  child: Text("No hay solicitudes pendientes.."));
+              return const Center(child: Text("No hay pedidos pendientes.."));
             }
             //Update delivery request lenght in shared prtovider
 
@@ -84,7 +96,7 @@ class _DeliveryRequestPageState extends State<DeliveryRequestPage> {
             );
           } else {
             return const Center(
-              child: Text("No hay solicitudes pendientes..."),
+              child: Text("No hay solicitudes pendientes.."),
             );
           }
         },

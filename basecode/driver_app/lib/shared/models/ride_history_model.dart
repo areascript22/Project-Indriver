@@ -16,6 +16,8 @@ class RideHistoryModel {
   String passengerName;
   String status;
   String requestType;
+  String audioFilePath;
+  String indicationText;
 
   RideHistoryModel({
     this.rideId,
@@ -32,6 +34,9 @@ class RideHistoryModel {
     required this.passengerName,
     required this.status,
     required this.requestType,
+    required this.audioFilePath,
+    required this.indicationText,
+    
   });
 
   // Convert a document from Firestore into a RideHistory instance
@@ -59,6 +64,8 @@ class RideHistoryModel {
       passengerName: data['passengerName'] ?? '',
       status: data['status'] ?? '',
       requestType: data['requestType'] ?? 'byCoordinates',
+      audioFilePath:data['audioFilePath']??'',
+      indicationText: data['indicationText']??''
     );
   }
 
@@ -85,6 +92,8 @@ class RideHistoryModel {
       'passengerName': passengerName,
       'status': status,
       'requestType': requestType,
+      'indicationText':indicationText,
+      'audioFilePath':audioFilePath,
     };
   }
 }

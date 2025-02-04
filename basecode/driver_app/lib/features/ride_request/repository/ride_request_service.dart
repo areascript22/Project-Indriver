@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:driver_app/shared/models/passenger.dart';
+import 'package:driver_app/shared/models/passenger_request.dart';
 import 'package:driver_app/shared/models/ride_history_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -112,7 +112,8 @@ class RideRequestService {
   }
 
   //Covert second driver to first driver
-  static Future<void> addPassengerDataToRequest(Passenger passenger) async {
+  static Future<void> addPassengerDataToRequest(
+      PassengerRequest passenger) async {
     final logger = Logger();
     String? driverId = FirebaseAuth.instance.currentUser?.uid;
     if (driverId == null) {

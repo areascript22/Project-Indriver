@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:passenger_app/shared/widgets/custom_drawer.dart';
 
 class RideHistoryPage extends StatefulWidget {
   const RideHistoryPage({super.key});

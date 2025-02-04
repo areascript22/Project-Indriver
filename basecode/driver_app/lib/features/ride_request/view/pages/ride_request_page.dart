@@ -1,4 +1,4 @@
-import 'package:driver_app/features/home/view/widgets/custom_drawe.dart';
+import 'package:driver_app/features/home/view/widgets/custom_drawer.dart';
 import 'package:driver_app/features/ride_request/view/widgets/driver_queue.dart';
 import 'package:driver_app/features/ride_request/view/widgets/passenger_info_card.dart';
 import 'package:driver_app/features/ride_request/view/widgets/second_passenger_tile.dart';
@@ -37,6 +37,7 @@ class _RideMRequestPageState extends State<RideMRequestPage> {
     rideRequestViewModel.listenerToPassengerRequest(sharedProvider);
     rideRequestViewModel.listenToSecondPassangerRequest();
     rideRequestViewModel.listenToDriverStatus(sharedProvider);
+    rideRequestViewModel.loadIcons();
   }
 
   @override
@@ -48,7 +49,7 @@ class _RideMRequestPageState extends State<RideMRequestPage> {
   @override
   Widget build(BuildContext context) {
     final rideRequestViewModel = Provider.of<RideRequestViewModel>(context);
-    // final sharedProvider = Provider.of<SharedProvider>(context);
+    final sharedProvider = Provider.of<SharedProvider>(context);
     rideRequestViewModel.rideRequestPageContext = context;
     return Scaffold(
       key: scaffoldKey,
@@ -74,10 +75,14 @@ class _RideMRequestPageState extends State<RideMRequestPage> {
               target: LatLng(-1.648920, -78.677108),
               zoom: 14,
             ),
-            markers: {...rideRequestViewModel.markers},
+            markers: {
+              ...rideRequestViewModel.markers,
+              rideRequestViewModel.taxiMarker ??
+                  const Marker(markerId: MarkerId("test"))
+            },
             polylines: {rideRequestViewModel.polylineFromPickUpToDropOff},
             onMapCreated: (controller) {
-              // rideRequestViewModel.onMapCreated(controller, sharedProvider);
+               rideRequestViewModel.onMapCreated(controller);
             },
           ),
           //Menu
@@ -97,28 +102,34 @@ class _RideMRequestPageState extends State<RideMRequestPage> {
           Positioned(
             top: 5,
             right: 80,
-            child: ElevatedButton(
+            child: CustomCircularButton(
+              icon: rideRequestViewModel.currenQueuePoosition == null
+                  ? const Icon(Ionicons.create_outline)
+                  : Text(rideRequestViewModel.currenQueuePoosition.toString()),
               onPressed: () async {
                 int? response = await showDriverQueueDialog(context);
                 if (response != null) {
                   rideRequestViewModel.currenQueuePoosition = response;
                 }
               },
-              style: ElevatedButton.styleFrom(
-                shape: const CircleBorder(),
-                padding: const EdgeInsets.all(10),
-                backgroundColor: Colors.blue,
-              ),
-              child: rideRequestViewModel.currenQueuePoosition == null
-                  ? const Icon(
-                      Ionicons.add,
-                      color: Colors.white,
-                      size: 30,
-                    )
-                  : Text(rideRequestViewModel.currenQueuePoosition.toString()),
             ),
           ),
 
+          //Go to current location button
+          Positioned(
+            top: 5,
+            right: 10,
+            child: CustomCircularButton(
+              onPressed: () async {
+                //animate camera
+                if (sharedProvider.driverCurrentPosition != null) {
+                  await rideRequestViewModel
+                      .animateToLocation(sharedProvider.driverCurrentPosition!);
+                }
+              },
+              icon: const Icon(Icons.navigation_rounded),
+            ),
+          ),
           //Passenger Info Card
           const Positioned(
               bottom: 0, left: 0, right: 0, child: PassengerInfoCard()),

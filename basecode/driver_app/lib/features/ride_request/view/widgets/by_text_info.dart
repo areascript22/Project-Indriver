@@ -18,10 +18,11 @@ class ByTextInfo extends StatelessWidget {
             const Row(
               children: [
                 Text(
-                  "Petición ",
+                  "Indicaciónes ",
                   style: TextStyle(fontWeight: FontWeight.bold),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                Text("mediante indicaciónes en texto."),
+                Text("mediante texto."),
               ],
             ),
             //Content

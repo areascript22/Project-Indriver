@@ -11,8 +11,11 @@ class RequestDriverService {
     try {
       final DatabaseReference driversRef =
           FirebaseDatabase.instance.ref('positions');
-      final DataSnapshot snapshot =
-          await driversRef.orderByChild('Timestamp').limitToFirst(1).get();
+      final DataSnapshot snapshot = await driversRef
+          .orderByChild('Timestamp')
+          .limitToFirst(1)
+          .get()
+          .timeout(const Duration(seconds: 7));
 
       if (snapshot.exists && snapshot.value != null) {
         final DataSnapshot child = snapshot.children.first;
@@ -55,7 +58,7 @@ class RequestDriverService {
     String requestType,
     String nodeName, {
     String? audioFilePath,
-    String? indicationText,
+    String? indicationText, 
   }) async {
     final Logger logger = Logger();
     try {
@@ -71,7 +74,8 @@ class RequestDriverService {
         'information': {
           'audioFilePath':
               audioFilePath ?? '', //In case it is 'byRecordedAudio' type
-          'indicationText': indicationText??'', //In case it is 'byTexting' type
+          'indicationText':
+              indicationText ?? '', //In case it is 'byTexting' type
           'name': sharedProvider.passengerModel!.name,
           'phone': sharedProvider.passengerModel!.phone,
           'profilePicture': sharedProvider.passengerModel!.profilePicture,
@@ -94,7 +98,8 @@ class RequestDriverService {
                 : 0.1,
           },
         },
-      });
+      }).timeout(const Duration(seconds: 7));
+      ;
 
       logger.i("Passenger node updated successfully.");
       return true;
@@ -118,7 +123,11 @@ class RequestDriverService {
         'dropOffLocation': sharedProvider.dropOffLocation ?? '',
       };
 
-      await dataRef.child(sharedProvider.passengerModel!.id).set(data);
+      await dataRef
+          .child(sharedProvider.passengerModel!.id)
+          .set(data)
+          .timeout(const Duration(seconds: 7));
+      ;
       logger.i("driver request written succesfully.");
       return true;
     } catch (e) {

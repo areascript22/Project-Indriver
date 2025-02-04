@@ -15,12 +15,13 @@ import 'package:passenger_app/shared/models/request_type.dart';
 import 'package:passenger_app/shared/models/route_info.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
 import 'package:passenger_app/shared/repositories/shared_service.dart';
+import 'package:passenger_app/shared/util/shared_util.dart';
 import 'package:passenger_app/shared/widgets/loading_overlay.dart';
-import 'package:passenger_app/shared/widgets/waiting_for_drover_overlay.dart';
 
 class RequestDriverViewModel extends ChangeNotifier {
   final Logger logger = Logger();
   final String apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
+  final SharedUtil sharedUtil = SharedUtil();
   //listeners
   StreamSubscription<DatabaseEvent>? driverStatusListener;
   StreamSubscription<DatabaseEvent>? driverPositionListener;
@@ -288,7 +289,8 @@ class RequestDriverViewModel extends ChangeNotifier {
         FirebaseDatabase.instance.ref('drivers/$driverId/status');
 
     try {
-      driverStatusListener = databaseRef.onValue.listen((DatabaseEvent event) {
+      driverStatusListener =
+          databaseRef.onValue.listen((DatabaseEvent event) async {
         // Check if the snapshot has data
         if (event.snapshot.exists) {
           // Get the status value
@@ -304,9 +306,12 @@ class RequestDriverViewModel extends ChangeNotifier {
               if (sharedProvider.mapPageContext != null) {
                 showDriverArrivedBotttomSheet(sharedProvider.mapPageContext!);
               }
+              //   await sharedUtil.playAudio("sounds/taxi_espera.mp3");
+              sharedUtil.repeatAudio("sounds/taxi_espera.mp3");
               break;
             case DriverRideStatus.goingToDropOff:
               sharedProvider.driverStatus = DriverRideStatus.goingToDropOff;
+              sharedUtil.stopAudioLoop();
               break;
             case DriverRideStatus.finished:
               sharedProvider.driverStatus = DriverRideStatus.finished;

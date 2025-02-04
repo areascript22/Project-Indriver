@@ -268,8 +268,8 @@ class MapViewModel extends ChangeNotifier {
         ),
         icon: BitmapDescriptor.defaultMarkerWithHue(
             sharedProvider.selectingPickUpOrDropOff
-                ? BitmapDescriptor.hueRed
-                : BitmapDescriptor.hueGreen),
+                ? BitmapDescriptor.hueGreen
+                : BitmapDescriptor.hueBlue),
       ),
     );
   }

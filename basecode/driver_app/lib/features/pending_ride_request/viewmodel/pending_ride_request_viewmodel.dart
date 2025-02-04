@@ -1,3 +1,4 @@
+import 'package:driver_app/core/utils/toast_message_util.dart';
 import 'package:driver_app/features/pending_ride_request/repository/pending_ride_request_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,9 @@ class PendingRideRequestViewModel extends ChangeNotifier {
         passengerId, driverId);
     if (response) {
       //Pending
+      await PendingRideRequestService.removeRideRequest(passengerId);
+    } else {
+      ToastMessageUtil.showToast("Peticion expirada");
     }
     loading = false;
   }
