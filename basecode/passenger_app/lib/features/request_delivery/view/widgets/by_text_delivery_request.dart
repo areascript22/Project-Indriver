@@ -7,10 +7,8 @@ import 'package:passenger_app/shared/widgets/custom_elevated_button.dart';
 import 'package:provider/provider.dart';
 
 class ByTextDeliveryRequest extends StatelessWidget {
-  final void Function()? requesFunction;
   const ByTextDeliveryRequest({
     super.key,
-    required this.requesFunction,
   });
 
   @override
@@ -73,11 +71,4 @@ class ByTextDeliveryRequest extends StatelessWidget {
       ),
     );
   }
-}
-
-Widget buildRequestDriverByText(void Function()? requesFunction) {
-  //Pass the function as parameter
-  return ByTextDeliveryRequest(
-    requesFunction: requesFunction,
-  );
 }

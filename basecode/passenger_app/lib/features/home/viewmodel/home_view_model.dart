@@ -104,12 +104,13 @@ class HomeViewModel extends ChangeNotifier {
     locationPermissionUserLevel = true;
     //initialize listener
     _startLocationTracking(sharedProvider);
-    _getCurrentLocation();
+    _getCurrentLocation(sharedProvider);
 
     return true;
   }
 
-  Future<bool> requestPermissionsAtUserLevel(SharedProvider sharedProvider) async {
+  Future<bool> requestPermissionsAtUserLevel(
+      SharedProvider sharedProvider) async {
     // Check the app's location permissions
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
@@ -139,7 +140,7 @@ class HomeViewModel extends ChangeNotifier {
     // If all checks pass, permissions are granted and location services are enabled
     locationPermissionUserLevel = true;
     _startLocationTracking(sharedProvider);
-    _getCurrentLocation();
+    _getCurrentLocation(sharedProvider);
     return true;
   }
 
@@ -183,13 +184,26 @@ class HomeViewModel extends ChangeNotifier {
     });
   }
 
-  void _getCurrentLocation() async {
+  void _getCurrentLocation(SharedProvider sharedProvider) async {
+    //Get last known position
+    if (!isCurrentLocationAvailable) {
+      Position? cPosition = await Geolocator.getLastKnownPosition();
+      if (cPosition != null) {
+        logger.f("Last known position Catched");
+        sharedProvider.passengerCurrentCoords =
+            LatLng(cPosition.latitude, cPosition.longitude);
+        isCurrentLocationAvailable = true;
+      }
+    }
+
     try {
       // Get the current location
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.medium);
       currentPosition = position;
       isCurrentLocationAvailable = true;
+      sharedProvider.passengerCurrentCoords =
+          LatLng(position.latitude, position.longitude);
       logger.i("GEt currento location executed...");
       //Animate camera
     } catch (e) {

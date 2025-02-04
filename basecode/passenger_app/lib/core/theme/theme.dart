@@ -9,6 +9,7 @@ ThemeData lightMode = ThemeData.light().copyWith(
     primary: Color(0xFFF5F5F5),
     secondary: Colors.red,
   ),
+
   textSelectionTheme: TextSelectionThemeData(
     selectionColor:
         Colors.black.withOpacity(0.4), // Color for selected text background
@@ -47,7 +48,7 @@ ThemeData lightMode = ThemeData.light().copyWith(
 );
 
 ThemeData darkMode = ThemeData.dark().copyWith(
-  scaffoldBackgroundColor: const Color(0xFF141414),
+  scaffoldBackgroundColor: Colors.black,
   brightness: Brightness.dark,
   cardColor: const Color(0xFF0C4769),
   colorScheme: const ColorScheme.dark(

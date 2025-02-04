@@ -17,6 +17,7 @@ class StarRatingsBottomSheet extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(20.0),
+      color: Theme.of(context).colorScheme.background,
       child: Padding(
         padding: EdgeInsets.only(
           left: 15,

@@ -5,6 +5,7 @@ import 'package:passenger_app/features/auth/view/pages/auth_wrapper.dart';
 import 'package:passenger_app/features/home/repositories/home_services.dart';
 import 'package:passenger_app/features/profile/view/pages/edit_profile_page.dart';
 import 'package:passenger_app/features/ride_history/repository/pages/ride_history_page.dart';
+import 'package:passenger_app/shared/models/g_user.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -14,6 +15,8 @@ class CustomDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sharedViewModel = Provider.of<SharedProvider>(context, listen: false);
+    GUser? passenger = sharedViewModel.passenger;
+
     return Drawer(
       child: Padding(
         padding: const EdgeInsets.only(left: 10, bottom: 20),
@@ -25,7 +28,7 @@ class CustomDrawer extends StatelessWidget {
                 //Header
                 const SizedBox(height: 20),
                 //UserData
-                if (sharedViewModel.passengerModel != null)
+                if (passenger != null)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,12 +40,10 @@ class CustomDrawer extends StatelessWidget {
                             radius: 35,
                             backgroundColor: Colors.transparent,
                             child: ClipOval(
-                              child: sharedViewModel
-                                      .passengerModel!.profilePicture.isNotEmpty
+                              child: passenger.profilePicture.isNotEmpty
                                   ? FadeInImage.assetNetwork(
                                       placeholder: 'assets/img/no_image.png',
-                                      image: sharedViewModel
-                                          .passengerModel!.profilePicture,
+                                      image: passenger.profilePicture,
                                       fadeInDuration:
                                           const Duration(milliseconds: 50),
                                       fit: BoxFit.cover,
@@ -62,13 +63,12 @@ class CustomDrawer extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               //Passenger's name
-                              if (sharedViewModel.passengerModel != null)
-                                Text(
-                                  sharedViewModel.passengerModel!.name,
-                                  style: const TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.bold),
-                                ),
+
+                              Text(
+                                passenger.name,
+                                style: const TextStyle(
+                                    fontSize: 17, fontWeight: FontWeight.bold),
+                              ),
                               const Row(
                                 children: [
                                   Icon(

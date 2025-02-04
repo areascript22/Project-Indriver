@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:passenger_app/shared/models/g_user.dart';
 import 'package:passenger_app/shared/models/passenger_model.dart';
 import 'package:passenger_app/features/auth/model/api_status_code.dart';
 import 'package:passenger_app/features/auth/view/pages/create_profiel_data.dart';
@@ -16,35 +17,38 @@ class PassengerDataWrapper extends StatelessWidget {
     final Logger logger = Logger();
     final passengerViewModel =
         Provider.of<PassengerViewModel>(context, listen: false);
-    final sharedProvider = Provider.of<SharedProvider>(context,listen: false);
-    return FutureBuilder(
+    final sharedProvider = Provider.of<SharedProvider>(context, listen: false);
+    return FutureBuilder<GUser?>(
       future: passengerViewModel.getAuthenticatedPassengerData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // Show a loading spinner while waiting for the data
           return const Scaffold(
             body: Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: Colors.blue,
+              ),
             ),
           );
         } else if (snapshot.hasData && snapshot.data != null) {
           //Always we will get a AuthREsult object
-          final authResult = snapshot.data as Succes;
+          // final authResult = snapshot.data as Succes;
 
-          if (authResult.response is PassengerModel) {
-            //The Passenger (current user) info.
-            passengerViewModel.passenger =
-                authResult.response as PassengerModel;
-            sharedProvider.passengerModel =
-                authResult.response as PassengerModel;
-            logger.i("Auth result is: ${authResult.response}");
-            return const PassengerApp();
-          } else {
-            return const CreateProfileData();
-          }
+          // if (authResult.response is PassengerModel) {
+          //The Passenger (current user) info.
+          // passengerViewModel.passenger =
+          //     authResult.response as PassengerModel;
+          // sharedProvider.passengerModel =
+          //     authResult.response as PassengerModel;
+          // logger.i("Auth result is: ${authResult.response}");
+
+          final respose = snapshot.data;
+
+          sharedProvider.passenger = respose;
+          return const PassengerApp();
         } else {
           logger.i("There is NOT info of ${snapshot.data}");
-          return const CircularProgressIndicator();
+          return const CreateProfileData();
         }
       },
     );

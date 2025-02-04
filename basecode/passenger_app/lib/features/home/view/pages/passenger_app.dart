@@ -3,7 +3,6 @@ import 'package:passenger_app/features/home/view/widgets/servicess_issue_alert.d
 import 'package:passenger_app/features/home/viewmodel/home_view_model.dart';
 import 'package:passenger_app/features/map/view/pages/map_page.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
-import 'package:passenger_app/shared/widgets/custom_drawer.dart';
 import 'package:provider/provider.dart';
 
 class PassengerApp extends StatefulWidget {
@@ -17,19 +16,12 @@ class _PassengerAppState extends State<PassengerApp> {
   @override
   void initState() {
     super.initState();
-    setDriverValue();
     checkGpsPermissions();
-  }
-
-  void setDriverValue() {
-    final homeViewModel = Provider.of<HomeViewModel>(context, listen: false);
-    homeViewModel.passenger =
-        Provider.of<SharedProvider>(context, listen: false).passengerModel;
   }
 
   void checkGpsPermissions() async {
     final homeViewModel = Provider.of<HomeViewModel>(context, listen: false);
-       final sharedProvider = Provider.of<SharedProvider>(context, listen: false);
+    final sharedProvider = Provider.of<SharedProvider>(context, listen: false);
     await homeViewModel.checkGpsPermissions(sharedProvider);
     homeViewModel.listenToLocationServicesAtSystemLevel();
     // homeViewModel.startLocationTracking();
@@ -41,7 +33,6 @@ class _PassengerAppState extends State<PassengerApp> {
     final homeViewModel = Provider.of<HomeViewModel>(context);
     final sharedProvider = Provider.of<SharedProvider>(context);
     return Scaffold(
-      drawer: const CustomDrawer(),
       appBar: AppBar(
         actions: [
           if (sharedProvider.deliveryLookingForDriver)

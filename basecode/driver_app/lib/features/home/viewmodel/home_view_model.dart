@@ -137,6 +137,7 @@ class HomeViewModel extends ChangeNotifier {
       }
     });
   }
+
   // To listen only pending ride request lenght
   void listenToPendingRideRequests(DatabaseReference requestsRef) {
     deliveryRequestLitener = requestsRef.onValue.listen((event) {
@@ -231,6 +232,7 @@ class HomeViewModel extends ChangeNotifier {
     });
   }
 
+  //request permissions
   Future<bool> requestPermissionsAtUserLevel(
       SharedProvider sharedProvider) async {
     // Check the app's location permissions

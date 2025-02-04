@@ -68,7 +68,7 @@ class RequestDriverService {
 
       // Update the "passenger" node under the specific main node
       await mainNodeRef.child(nodeName).set({
-        'passengerId': sharedProvider.passengerModel!.id,
+        'passengerId': sharedProvider.passenger!.id,
         'status': "pending",
         'type': requestType,
         'information': {
@@ -76,9 +76,9 @@ class RequestDriverService {
               audioFilePath ?? '', //In case it is 'byRecordedAudio' type
           'indicationText':
               indicationText ?? '', //In case it is 'byTexting' type
-          'name': sharedProvider.passengerModel!.name,
-          'phone': sharedProvider.passengerModel!.phone,
-          'profilePicture': sharedProvider.passengerModel!.profilePicture,
+          'name': sharedProvider.passenger!.name,
+          'phone': sharedProvider.passenger!.phone,
+          'profilePicture': sharedProvider.passenger!.profilePicture,
           'pickUpLocation': sharedProvider.pickUpLocation ?? '',
           'dropOffLocation': sharedProvider.dropOffLocation ?? '',
           "pickUpCoordenates": {
@@ -117,17 +117,17 @@ class RequestDriverService {
       DatabaseReference dataRef =
           FirebaseDatabase.instance.ref('driver_requests');
       Map<String, dynamic> data = {
-        'name': sharedProvider.passengerModel!.name,
-        'profilePicture': sharedProvider.passengerModel!.profilePicture,
+        'name': sharedProvider.passenger!.name,
+        'profilePicture': sharedProvider.passenger!.profilePicture,
         'pickUpLocation': sharedProvider.pickUpLocation ?? '',
         'dropOffLocation': sharedProvider.dropOffLocation ?? '',
       };
 
       await dataRef
-          .child(sharedProvider.passengerModel!.id)
+          .child(sharedProvider.passenger!.id!)
           .set(data)
           .timeout(const Duration(seconds: 7));
-      ;
+      
       logger.i("driver request written succesfully.");
       return true;
     } catch (e) {

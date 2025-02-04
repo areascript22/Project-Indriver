@@ -5,7 +5,7 @@ class GUser {
   final String? id;
   final String name;
   final String? lastName;
-  final String email;
+  final String? email;
   final String phone;
   final String profilePicture;
   final Ratings ratings;
@@ -42,7 +42,7 @@ class GUser {
   // Convert a GUser object to a map (Firestore storage)
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      //  'id': id,
       'name': name,
       'lastName': lastName,
       'email': email,

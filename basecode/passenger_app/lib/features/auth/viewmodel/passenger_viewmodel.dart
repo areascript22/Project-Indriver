@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:passenger_app/shared/models/g_user.dart';
 import 'package:passenger_app/shared/models/passenger_model.dart';
 import 'package:passenger_app/features/auth/model/api_status_code.dart';
 import 'package:passenger_app/features/auth/repositories/passenger_servide.dart';
@@ -40,12 +41,12 @@ class PassengerViewModel extends ChangeNotifier {
     return false;
   }
 
-  Future<Object> getAuthenticatedPassengerData() async {
+  Future<GUser?> getAuthenticatedPassengerData() async {
     return PassengerService.getUserData();
   }
 
   //Save Pasesnger data in Firestore
-  Future<bool> savePassengerDataInFirestore(PassengerModel passenger) async {
+  Future<bool> savePassengerDataInFirestore(GUser passenger) async {
     loading = true;
     bool response =
         await PassengerService.savePassengerDataInFirestore(passenger);

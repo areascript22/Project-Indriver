@@ -143,7 +143,7 @@ class RequestDriverViewModel extends ChangeNotifier {
     // });
     //Listen to driver
     final databaseRef = FirebaseDatabase.instance
-        .ref('driver_requests/${sharedProvider.passengerModel!.id}/driver');
+        .ref('driver_requests/${sharedProvider.passenger!.id}/driver');
     databaseRef.onValue.listen((event) async {
       if (event.snapshot.exists) {
         String? driverId = event.snapshot.value as String?;
@@ -170,7 +170,7 @@ class RequestDriverViewModel extends ChangeNotifier {
           //    _listenToDriverStatus(driverInfo.id, sharedProvider);
           _listenToDriverCoordenates(driverInfo.id, sharedProvider);
           _listenToPassengerIdChanges(
-              driverId, sharedProvider.passengerModel!.id, sharedProvider);
+              driverId, sharedProvider.passenger!.id!, sharedProvider);
         }
       }
     });

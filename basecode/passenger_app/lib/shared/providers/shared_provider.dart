@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
 import 'package:passenger_app/shared/models/driver_model.dart';
-import 'package:passenger_app/shared/models/passenger_model.dart';
+import 'package:passenger_app/shared/models/g_user.dart';
 import 'package:passenger_app/shared/models/request_type.dart';
 import 'package:passenger_app/shared/repositories/shared_service.dart';
 
@@ -13,7 +13,7 @@ class SharedProvider extends ChangeNotifier {
   final String apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
   BuildContext? mapPageContext;
   //Passenger data
-  PassengerModel? passengerModel;
+  GUser? passenger;
   //Driver data
   DriverModel? _driverModel;
   String _driverStatus = ''; //To Track ride status

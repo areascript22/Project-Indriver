@@ -24,10 +24,10 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> scaffoldkey = GlobalKey<ScaffoldState>();
   final logger = Logger();
+
   @override
   void initState() {
     super.initState();
-    logger.f("Initizlizing Map Page");
     //Adign A value to our
     initializeNeccesaryData();
   }
@@ -115,9 +115,12 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
             Positioned(
               top: 10,
               left: 15,
-              child: CircularButton(
-                onPressed: () => scaffoldkey.currentState?.openDrawer(),
-                icon: const Icon(Icons.menu),
+              child: SlideTransition(
+                position: mapViewModel.animOffsetDB,
+                child: CircularButton(
+                  onPressed: () => scaffoldkey.currentState?.openDrawer(),
+                  icon: const Icon(Icons.menu),
+                ),
               ),
             ),
 
@@ -125,27 +128,33 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
           Positioned(
             top: 10,
             right: 10,
-            child: CircularButton(
-              onPressed: () {
-                // mapViewModel
-                //     .animateCameraToPosition(LatLng(-1.663946, -78.672757));
-                mapViewModel.getCurrentLocationAndNavigate();
-              },
-              icon: const Icon(Icons.navigation_rounded),
+            child: SlideTransition(
+              position: mapViewModel.animOffsetDB,
+              child: CircularButton(
+                onPressed: () async {
+                  if (sharedProvider.passengerCurrentCoords == null) return;
+                  await mapViewModel.animateCameraToPosition(
+                      sharedProvider.passengerCurrentCoords!);
+                },
+                icon: const Icon(Icons.navigation_rounded),
+              ),
             ),
           ),
 
           //Return to Select Pick Up
           if (mapViewModel.enteredInSelectingLocationMode)
             Positioned(
-              top: 40,
-              left: 20,
-              child: CircularButton(
-                onPressed: () {
-                  mapViewModel.enteredInSelectingLocationMode = false;
-                  sharedProvider.selectingPickUpOrDropOff = true;
-                },
-                icon: const Icon(Icons.arrow_back),
+              top: 10,
+              left: 15,
+              child: SlideTransition(
+                position: mapViewModel.animOffsetDB,
+                child: CircularButton(
+                  onPressed: () {
+                    mapViewModel.enteredInSelectingLocationMode = false;
+                    sharedProvider.selectingPickUpOrDropOff = true;
+                  },
+                  icon: const Icon(Icons.arrow_back),
+                ),
               ),
             ),
           //Button "Hecho"
@@ -154,17 +163,21 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
               left: 50,
               right: 50,
               bottom: 20,
-              child: CustomElevatedButton(
-                onTap: () async {
-                  //draw route
-                  await mapViewModel.drawRouteBetweenTwoPoints(sharedProvider);
-                  //Return
-                  mapViewModel.enteredInSelectingLocationMode = false;
-                },
-                color: Colors.blue,
-                child: mapViewModel.loading
-                    ? const CircularProgressIndicator()
-                    : const Text("Hecho"),
+              child: SlideTransition(
+                position: mapViewModel.animOfssetBS,
+                child: CustomElevatedButton(
+                  onTap: () async {
+                    //draw route
+                    await mapViewModel
+                        .drawRouteBetweenTwoPoints(sharedProvider);
+                    //Return
+                    mapViewModel.enteredInSelectingLocationMode = false;
+                  },
+                  color: Colors.blue,
+                  child: mapViewModel.loading
+                      ? const CircularProgressIndicator()
+                      : const Text("Hecho"),
+                ),
               ),
             ),
 
@@ -173,22 +186,33 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
               !mapViewModel.enteredInSelectingLocationMode &&
               !sharedProvider.requestDriverOrDelivery &&
               sharedProvider.driverModel == null)
-            const Positioned(
+            Positioned(
               left: 0,
               right: 0,
               bottom: 0,
-              child: RequestDriverBottomSheet(),
+              child: SlideTransition(
+                position: mapViewModel.animOfssetBS,
+                child: RequestDriverBottomSheet(
+                  fitMap: () {
+                    mapViewModel.fitMapToTwoLatLngs(
+                        sharedProvider: sharedProvider);
+                  },
+                ),
+              ),
             ),
           //Request Delivery Bottom sheet
           if (!mapViewModel.isMovingMap &&
               !mapViewModel.enteredInSelectingLocationMode &&
               sharedProvider.requestDriverOrDelivery &&
               sharedProvider.driverModel == null)
-            const Positioned(
+            Positioned(
               left: 0,
               right: 0,
               bottom: 0,
-              child: RequestDeliveryBottomSheet(),
+              child: SlideTransition(
+                position: mapViewModel.animOfssetBS,
+                child: const RequestDeliveryBottomSheet(),
+              ),
             ),
 
           //WHEN DRIVER IS COMMING.
@@ -202,7 +226,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
 
           // Overlay
           if (sharedProvider.deliveryLookingForDriver)
-            Positioned.fill(
+            const Positioned.fill(
               child: WitingForDriverOverlay(),
             ),
         ],

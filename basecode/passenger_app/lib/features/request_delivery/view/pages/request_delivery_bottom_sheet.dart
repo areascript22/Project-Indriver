@@ -142,17 +142,22 @@ class _RequestDeliveryBottomSheetState extends State<RequestDeliveryBottomSheet>
                   ),
 
                   //TABBAR CONTENT
-                  SizedBox(
-                    height: 290, // Set a fixed height
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        ByCoordDeliveryRequest(),
-                        ByAudioDeliveryRequest(),
-                        ByTextDeliveryRequest(requesFunction: () {}),
-                      ],
+                  //Content
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        );
+                      },
+                      child: _buildTabView(_tabController.index),
                     ),
-                  ),
+                  )
                 ],
               ),
             ),
@@ -160,5 +165,20 @@ class _RequestDeliveryBottomSheetState extends State<RequestDeliveryBottomSheet>
         ),
       ],
     );
+  }
+
+  Widget _buildTabView(
+    int index,
+  ) {
+    switch (index) {
+      case 0:
+        return const ByCoordDeliveryRequest();
+      case 1:
+        return const ByAudioDeliveryRequest();
+      case 2:
+        return const ByTextDeliveryRequest();
+      default:
+        return const SizedBox();
+    }
   }
 }

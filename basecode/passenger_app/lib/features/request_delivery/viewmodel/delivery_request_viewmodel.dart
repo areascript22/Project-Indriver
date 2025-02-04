@@ -82,7 +82,7 @@ class DeliveryRequestViewModel extends ChangeNotifier {
         requestType: requestType,
         passengerId: passengerId,
         deliveryDetails: deliveryDetailsModel,
-        passengerModel: sharedProvider.passengerModel!,
+        passengerModel: sharedProvider.passenger!,
         sharedProvider: sharedProvider,
         audioFilePath: audioFilePath,
         indicationText: indicationText,

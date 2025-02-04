@@ -95,9 +95,9 @@ class _SearchLocationButtonSheetState extends State<SearchLocationButtonSheet> {
     return FractionallySizedBox(
       heightFactor: 0.8, // Set the height to 80% of the screen
       child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white, // White background
-          borderRadius: BorderRadius.vertical(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.background, // White background
+          borderRadius: const BorderRadius.vertical(
             top: Radius.circular(16), // Rounded top corners
           ),
         ),
@@ -199,7 +199,7 @@ class _SearchLocationButtonSheetState extends State<SearchLocationButtonSheet> {
                                 String placeId = mapViewModel
                                     .listOfLcoationsPickUp[index]['place_id'];
                                 await mapViewModel.getCoordinatesByPlaceId(
-                                    placeId, fatherContext,sharedProvider);
+                                    placeId, fatherContext, sharedProvider);
                               },
                               title: Text(
                                   "${mapViewModel.listOfLcoationsPickUp[index]['description']}"),
@@ -228,7 +228,7 @@ class _SearchLocationButtonSheetState extends State<SearchLocationButtonSheet> {
                                 String placeId = mapViewModel
                                     .listOfLcoationsDropOff[index]['place_id'];
                                 await mapViewModel.getCoordinatesByPlaceId(
-                                    placeId, fatherContext,sharedProvider);
+                                    placeId, fatherContext, sharedProvider);
                               },
                               title: Text(
                                   "${mapViewModel.listOfLcoationsDropOff[index]['description']}"),

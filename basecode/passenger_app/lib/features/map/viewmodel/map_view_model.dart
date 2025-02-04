@@ -101,6 +101,45 @@ class MapViewModel extends ChangeNotifier {
 
   //FUNCTIONS
 
+  //fit map
+  void fitMapToTwoLatLngs({
+    double padding = 200.0, // Optional padding around the markers
+    required SharedProvider sharedProvider,
+  }) async {
+    if (sharedProvider.pickUpCoordenates == null ||
+        sharedProvider.dropOffCoordenates == null) {
+      return;
+    }
+    LatLng point1 = sharedProvider.pickUpCoordenates!;
+    LatLng point2 = sharedProvider.dropOffCoordenates!;
+
+    // Create LatLngBounds based on the two LatLng points
+    LatLngBounds bounds;
+
+    if (point1.latitude > point2.latitude &&
+        point1.longitude > point2.longitude) {
+      bounds = LatLngBounds(southwest: point2, northeast: point1);
+    } else if (point1.latitude > point2.latitude) {
+      bounds = LatLngBounds(
+        southwest: LatLng(point2.latitude, point1.longitude),
+        northeast: LatLng(point1.latitude, point2.longitude),
+      );
+    } else if (point1.longitude > point2.longitude) {
+      bounds = LatLngBounds(
+        southwest: LatLng(point1.latitude, point2.longitude),
+        northeast: LatLng(point2.latitude, point1.longitude),
+      );
+    } else {
+      bounds = LatLngBounds(southwest: point1, northeast: point2);
+    }
+
+    // Animate the camera to fit the bounds
+    GoogleMapController controller = await mapController.future;
+    controller.animateCamera(
+      CameraUpdate.newLatLngBounds(bounds, padding),
+    );
+  }
+
   /// Function to animate the camera to a given LatLng position.
 //Animate camera given an location point
   Future<void> animateCameraToPosition(LatLng locationToMove) async {
@@ -139,7 +178,7 @@ class MapViewModel extends ChangeNotifier {
       TickerProvider vsyn, SharedProvider sharedProvider) async {
     //Initialize animation controller
     animController = AnimationController(
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 300),
       vsync: vsyn,
     );
     animOffsetDB = Tween<Offset>(

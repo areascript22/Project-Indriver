@@ -22,10 +22,19 @@ class _DriverBottomCardState extends State<DriverBottomCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 5),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
-        borderRadius: const BorderRadius.all(
-          Radius.circular(10),
+        color: Theme.of(context).colorScheme.background,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(15),
+          topRight: Radius.circular(15),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         children: [

@@ -4,34 +4,33 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:logger/logger.dart';
+import 'package:passenger_app/shared/models/g_user.dart';
 import 'package:passenger_app/shared/models/passenger_model.dart';
-import 'package:passenger_app/features/auth/model/api_status_code.dart';
 
 class PassengerService {
-
   //GEt Passenger data from Firestore, only is passenger us authenticated
-  static Future<Object> getUserData() async {
+  static Future<GUser?> getUserData() async {
     final Logger logger = Logger();
     try {
       User? user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        DocumentSnapshot userData = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
-        if (userData.exists) {
-          return Succes(
-              code: 200, response: PassengerModel.fromFirestore(userData));
-        } else {
-          return Failure(
-              code: 100, errorResponse: 'No existen datos del usuario');
-        }
+      if (user == null) {
+        logger.e("Usr is not authenticated");
+        return null;
+      }
+
+      DocumentSnapshot userData = await FirebaseFirestore.instance
+          .collection('g_user')
+          .doc(user.uid)
+          .get();
+
+      if (userData.exists) {
+        return GUser.fromMap(userData.data() as Map);
       } else {
-        return Failure(code: 100, errorResponse: 'Usuario no registrado');
+        return null;
       }
     } catch (e) {
       logger.e("Error al obtner datos de usuario: $e");
-      return Failure(code: 100, errorResponse: 'Error al obtener datos');
+      return null;
     }
   }
 
@@ -51,29 +50,13 @@ class PassengerService {
   }
 
   //Save user data in Firestore
-  static Future<bool> savePassengerDataInFirestore(
-      PassengerModel passenger) async {
+  static Future<bool> savePassengerDataInFirestore(GUser passenger) async {
     final Logger logger = Logger();
     try {
       await FirebaseFirestore.instance
-          .collection('users')
+          .collection('g_user')
           .doc(passenger.id)
-          .set({
-        'name': passenger.name,
-        'lastName': passenger.lastName,
-        'email': passenger.email,
-        'phone': passenger.phone,
-        'paymentMethods': passenger.paymentMethods,
-        'profilePicture': passenger.profilePicture,
-        ' rideHistory': '',
-        'ratings': {
-          'rating': passenger.ratings.rating,
-          'ratingCount': passenger.ratings.ratingCount,
-          'totalRatingScore': passenger.ratings.totalRatingScore,
-        },
-        'createdAt': passenger.createdAt,
-        'updatedAt': passenger.updatedAt,
-      });
+          .set(passenger.toMap());
       return true;
     } catch (e) {
       logger.e("Error adding user data in Firestore: ${e.toString()}");

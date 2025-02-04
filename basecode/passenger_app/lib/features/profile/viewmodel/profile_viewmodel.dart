@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:passenger_app/core/utils/toast_message_util.dart';
 import 'package:passenger_app/features/profile/repositories/profile_services.dart';
-import 'package:passenger_app/shared/models/passenger_model.dart';
+import 'package:passenger_app/shared/models/g_user.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
 
-class ProfileViewModel extends ChangeNotifier{
+class ProfileViewModel extends ChangeNotifier {
   final Logger logger = Logger();
   int currentIndexStack = 0;
   bool _loading = false;
@@ -45,7 +46,7 @@ class ProfileViewModel extends ChangeNotifier{
   void updatePassengerData(
       GlobalKey<FormState> formKey,
       BuildContext context,
-      PassengerModel passengerModel,
+      GUser passengerModel,
       File? imageFile,
       SharedProvider sharedProvider) async {
     loading = false;
@@ -71,12 +72,12 @@ class ProfileViewModel extends ChangeNotifier{
         profilePicture = await ProfielServices.uploadImage(
             imageFile, FirebaseAuth.instance.currentUser!.uid);
 
-        sharedProvider.passengerModel!.profilePicture = profilePicture!;
+        // sharedProvider.passenger!.profilePicture = profilePicture!;
       }
       //add data to update
       Map<String, dynamic> valuesToUpdate = {};
       valuesToUpdate['id'] = FirebaseAuth.instance.currentUser!.uid;
-      if (profilePicture.isNotEmpty) {
+      if (profilePicture!.isNotEmpty) {
         valuesToUpdate['profilePicture'] = profilePicture;
       }
       if (nameController.text != passengerModel.name) {
@@ -95,17 +96,12 @@ class ProfileViewModel extends ChangeNotifier{
 
       //Navigato to Map Page
       if (dataUpdated) {
-        sharedProvider.passengerModel!.name = nameController.text;
-        sharedProvider.passengerModel!.lastName = lastnameController.text;
-        sharedProvider.passengerModel!.phone = phoneController.text;
+        // sharedProvider.passengerModel!.name = nameController.text;
+        // sharedProvider.passengerModel!.lastName = lastnameController.text;
+        // sharedProvider.passengerModel!.phone = phoneController.text;
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Datos actualizados'), // Message to display
-            ),
-          );
-
+          ToastMessageUtil.showToast('Datos actualizados');
           Navigator.pop(context);
         }
       }

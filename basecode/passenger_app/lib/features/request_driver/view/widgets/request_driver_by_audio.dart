@@ -13,6 +13,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class RequestDriverByAudio extends StatefulWidget {
+  const RequestDriverByAudio({super.key});
   @override
   _RequestDriverByAudioState createState() => _RequestDriverByAudioState();
 }
@@ -160,7 +161,6 @@ class _RequestDriverByAudioState extends State<RequestDriverByAudio> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(

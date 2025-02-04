@@ -12,6 +12,7 @@ class CircularButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: Theme.of(context)
             .colorScheme
@@ -27,9 +28,9 @@ class CircularButton extends StatelessWidget {
         ],
       ),
       child: IconButton(
-        icon: icon,
-        color: Colors.blue, // Set the icon color
+        icon: icon, 
         onPressed: onPressed,
+        iconSize: 25,
       ),
     );
   }

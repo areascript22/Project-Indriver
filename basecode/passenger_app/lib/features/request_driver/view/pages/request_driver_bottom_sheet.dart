@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:passenger_app/features/request_driver/view/widgets/star_ratings_bottom_sheet.dart';
+
 import 'package:passenger_app/shared/models/request_type.dart';
 import 'package:passenger_app/features/request_driver/view/widgets/request_driver_by_audio.dart';
 import 'package:passenger_app/features/request_driver/view/widgets/request_driver_by_text.dart';
 import 'package:passenger_app/shared/widgets/bs_elevated_button.dart';
-import 'package:passenger_app/features/request_driver/view/widgets/bs_text_field.dart';
 import 'package:passenger_app/shared/widgets/custom_image_button.dart';
 import 'package:passenger_app/features/request_driver/viewmodel/request_driver_viewmodel.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
@@ -15,8 +14,10 @@ import 'package:passenger_app/shared/widgets/custom_elevated_button.dart';
 import 'package:provider/provider.dart';
 
 class RequestDriverBottomSheet extends StatefulWidget {
+  final void Function() fitMap;
   const RequestDriverBottomSheet({
     super.key,
+    required this.fitMap,
   });
 
   @override
@@ -74,7 +75,7 @@ class _RequestDriverBottomSheetState extends State<RequestDriverBottomSheet>
       children: [
         CustomCircularButton(
             onPressed: () {
-              // mapPageController.fitBounds(value);
+              widget.fitMap();
             },
             icon: const Icon(Icons.zoom_in)),
         const SizedBox(height: 4),
@@ -119,6 +120,7 @@ class _RequestDriverBottomSheetState extends State<RequestDriverBottomSheet>
                 const Divider(color: Colors.blue),
                 //REQUEST RIDE OPTIONS
                 // TabBar at the top of the Bottom Sheet
+
                 TabBar(
                   controller: _tabController,
                   labelColor: Colors.blue,
@@ -147,25 +149,47 @@ class _RequestDriverBottomSheetState extends State<RequestDriverBottomSheet>
                     }
                   },
                 ),
-                // TabBarView below the TabBar
-                SizedBox(
-                  height: 290, // Set a fixed height
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      byMapOptions(sharedViewModel, requestDriverViewModel,
-                          referenceTextController),
-                      buildRequestDriverByAudio(),
-                      buildRequestDriverByText(() {}),
-                    ],
+                //Content
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      );
+                    },
+                    child: _buildTabView(_tabController.index, sharedViewModel,
+                        requestDriverViewModel, referenceTextController),
                   ),
-                ),
+                )
               ],
             ),
           ),
         ),
       ],
     );
+  }
+
+  Widget _buildTabView(
+      int index,
+      SharedProvider sharedViewModel,
+      RequestDriverViewModel requestDriverViewModel,
+      TextEditingController referenceTextController) {
+    switch (index) {
+      case 0:
+        return byMapOptions(
+            sharedViewModel, requestDriverViewModel, referenceTextController);
+      case 1:
+        return buildRequestDriverByAudio();
+      case 2:
+        return buildRequestDriverByText(() {});
+      default:
+        return const SizedBox();
+    }
   }
 
 //Request driver by selecting pick-up and drop-off location
@@ -258,17 +282,11 @@ class _RequestDriverBottomSheetState extends State<RequestDriverBottomSheet>
                     ),
                   ),
                 ),
-              // const SizedBox(height: 5),
-              // BSTextField(
-              //   textEditingController: referenceTextController,
-              //   hintText: "Referencia....",
-              //   leftIcon: Ionicons.reader,
-              //   rightIcon: Ionicons.pencil,
-              // ),
             ],
           ),
 
           //Request Taxi
+          const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: CustomElevatedButton(

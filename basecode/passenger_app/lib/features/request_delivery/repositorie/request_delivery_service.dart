@@ -1,14 +1,14 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:logger/logger.dart';
 import 'package:passenger_app/features/request_delivery/model/delivery_details_model.dart';
-import 'package:passenger_app/shared/models/passenger_model.dart';
+import 'package:passenger_app/shared/models/g_user.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
 
 class RequestDeliveryService {
   // Static function to write this model to Firebase Realtime Database
   static Future<bool> writeToDatabase({
     required String passengerId,
-    required PassengerModel passengerModel,
+    required GUser passengerModel,
     required String requestType,
     DeliveryDetailsModel? deliveryDetails,
     required SharedProvider sharedProvider,
