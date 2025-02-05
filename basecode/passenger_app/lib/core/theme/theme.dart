@@ -7,7 +7,7 @@ ThemeData lightMode = ThemeData.light().copyWith(
   colorScheme: const ColorScheme.light(
     inversePrimary: Colors.black,
     primary: Color(0xFFF5F5F5),
-    secondary: Colors.red,
+    secondary: Colors.blue,
   ),
 
   textSelectionTheme: TextSelectionThemeData(
@@ -54,7 +54,7 @@ ThemeData darkMode = ThemeData.dark().copyWith(
   colorScheme: const ColorScheme.dark(
     inversePrimary: Colors.white, //For icon (select profile image)
     primary: Color(0xFF323943),
-    secondary: Color.fromARGB(0, 3, 4, 4),
+    secondary: Color(0xFF252527),
   ),
   textSelectionTheme: TextSelectionThemeData(
     selectionColor:

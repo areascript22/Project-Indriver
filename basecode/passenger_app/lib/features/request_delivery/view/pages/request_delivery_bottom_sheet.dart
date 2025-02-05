@@ -61,7 +61,7 @@ class _RequestDeliveryBottomSheetState extends State<RequestDeliveryBottomSheet>
 
   @override
   void dispose() {
-    viewMdelToDispose!.clearListeners();
+    //  viewMdelToDispose!.clearListeners();
     super.dispose();
   }
 

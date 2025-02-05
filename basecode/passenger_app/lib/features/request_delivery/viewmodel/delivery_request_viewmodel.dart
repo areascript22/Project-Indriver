@@ -45,6 +45,7 @@ class DeliveryRequestViewModel extends ChangeNotifier {
 
   //FUNCTIONS
   void clearListeners() {
+    logger.e("Removing Listeners...");
     driverStatusListener?.cancel();
     driverAcceptanceListener?.cancel();
     driverPositionListener?.cancel();
@@ -148,6 +149,7 @@ class DeliveryRequestViewModel extends ChangeNotifier {
     final Logger logger = Logger();
     final databaseRef =
         FirebaseDatabase.instance.ref('delivery_requests/$passengerId/status');
+    logger.f("Starting listener at: $passengerId");
 
     try {
       driverStatusListener = databaseRef.onValue.listen((DatabaseEvent event) {
@@ -155,6 +157,7 @@ class DeliveryRequestViewModel extends ChangeNotifier {
         if (event.snapshot.exists) {
           // Get the status value
           final status = event.snapshot.value as String;
+          logger.e("Status changed to: $status");
           switch (status) {
             case DeliveryStatus.haveThePackage:
               sharedProvider.deliveryStatus = DeliveryStatus.haveThePackage;
@@ -179,7 +182,6 @@ class DeliveryRequestViewModel extends ChangeNotifier {
 
               //Return to normal state of the appp
               sharedProvider.driverModel = null;
-
               sharedProvider.dropOffCoordenates = null;
 
               sharedProvider.dropOffLocation = null;

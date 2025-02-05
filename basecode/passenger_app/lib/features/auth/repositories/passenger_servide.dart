@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:logger/logger.dart';
 import 'package:passenger_app/shared/models/g_user.dart';
-import 'package:passenger_app/shared/models/passenger_model.dart';
 
 class PassengerService {
   //GEt Passenger data from Firestore, only is passenger us authenticated
@@ -24,7 +23,7 @@ class PassengerService {
           .get();
 
       if (userData.exists) {
-        return GUser.fromMap(userData.data() as Map);
+        return GUser.fromMap(userData.data() as Map, id: userData.id);
       } else {
         return null;
       }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:passenger_app/core/theme/theme.dart';
 import 'package:passenger_app/features/auth/view/pages/auth_wrapper.dart';
+import 'package:passenger_app/features/auth/view/pages/splash_screen_page.dart';
 import 'package:passenger_app/features/auth/viewmodel/passenger_viewmodel.dart';
 import 'package:passenger_app/features/home/viewmodel/home_view_model.dart';
 import 'package:passenger_app/features/map/viewmodel/map_view_model.dart';
@@ -56,7 +57,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: lightMode,
       darkTheme: darkMode,
-      home: const AuthWrapper(),
+      home: const SplashScreen(),
     );
   }
 }

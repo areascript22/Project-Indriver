@@ -73,11 +73,17 @@ class _RequestDriverBottomSheetState extends State<RequestDriverBottomSheet>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CustomCircularButton(
+        //Fit map button
+        if (sharedViewModel.pickUpCoordenates != null &&
+            sharedViewModel.dropOffCoordenates != null &&
+            sharedViewModel.requestType == RequestType.byCoordinates)
+          CustomCircularButton(
             onPressed: () {
               widget.fitMap();
             },
-            icon: const Icon(Icons.zoom_in)),
+            icon: const Icon(Icons.zoom_in),
+          ),
+        //Bottom sheet conent
         const SizedBox(height: 4),
         Container(
           decoration: BoxDecoration(

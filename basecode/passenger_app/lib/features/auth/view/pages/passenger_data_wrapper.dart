@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:passenger_app/shared/models/g_user.dart';
-import 'package:passenger_app/shared/models/passenger_model.dart';
-import 'package:passenger_app/features/auth/model/api_status_code.dart';
 import 'package:passenger_app/features/auth/view/pages/create_profiel_data.dart';
 import 'package:passenger_app/features/auth/viewmodel/passenger_viewmodel.dart';
 import 'package:passenger_app/features/home/view/pages/passenger_app.dart';

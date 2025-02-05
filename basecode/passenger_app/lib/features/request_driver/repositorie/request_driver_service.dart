@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:logger/logger.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
@@ -58,7 +59,7 @@ class RequestDriverService {
     String requestType,
     String nodeName, {
     String? audioFilePath,
-    String? indicationText, 
+    String? indicationText,
   }) async {
     final Logger logger = Logger();
     try {
@@ -113,6 +114,12 @@ class RequestDriverService {
   static Future<bool> addDriverRequestToQueue(
       SharedProvider sharedProvider) async {
     final logger = Logger();
+    //get id
+    final driverId = FirebaseAuth.instance.currentUser?.uid;
+    if (driverId == null) {
+      logger.e("Error: User is not authenticated.");
+      return false;
+    }
     try {
       DatabaseReference dataRef =
           FirebaseDatabase.instance.ref('driver_requests');
@@ -122,12 +129,13 @@ class RequestDriverService {
         'pickUpLocation': sharedProvider.pickUpLocation ?? '',
         'dropOffLocation': sharedProvider.dropOffLocation ?? '',
       };
+      logger.i('Data to save: $data');
 
       await dataRef
-          .child(sharedProvider.passenger!.id!)
+          .child(driverId)
           .set(data)
           .timeout(const Duration(seconds: 7));
-      
+
       logger.i("driver request written succesfully.");
       return true;
     } catch (e) {

@@ -25,9 +25,9 @@ class GUser {
   });
 
   // Convert a map (Firestore document) to a GUser object
-  factory GUser.fromMap(Map map) {
+  factory GUser.fromMap(Map map, {String? id}) {
     return GUser(
-      id: map['id'],
+      id: id,
       name: map['name'] ?? '',
       lastName: map['lastName'],
       email: map['email'] ?? '',
