@@ -25,7 +25,7 @@ class CustomDrawer extends StatelessWidget {
               children: [
                 //User data banner
                 const SizedBox(height: 50),
-                if (sharedProvider.driverModel != null)
+                if (sharedProvider.driver != null)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,11 +38,11 @@ class CustomDrawer extends StatelessWidget {
                             backgroundColor: Colors.transparent,
                             child: ClipOval(
                               child: sharedProvider
-                                      .driverModel!.profilePicture.isNotEmpty
+                                      .driver!.profilePicture.isNotEmpty
                                   ? FadeInImage.assetNetwork(
                                       placeholder: 'assets/img/no_image.png',
                                       image: sharedProvider
-                                          .driverModel!.profilePicture,
+                                          .driver!.profilePicture,
                                       fadeInDuration:
                                           const Duration(milliseconds: 50),
                                       fit: BoxFit.cover,
@@ -62,9 +62,9 @@ class CustomDrawer extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               //Passenger's name
-                              if (sharedProvider.driverModel != null)
+                              if (sharedProvider.driver != null)
                                 Text(
-                                  sharedProvider.driverModel!.name,
+                                  sharedProvider.driver!.name,
                                   style: const TextStyle(
                                       fontSize: 17,
                                       fontWeight: FontWeight.bold),

@@ -38,6 +38,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       homeViewModel.nameController.text = passengerModel.name;
       homeViewModel.lastnameController.text = passengerModel.lastName ?? '';
       homeViewModel.phoneController.text = passengerModel.phone;
+      homeViewModel.emailController.text = passengerModel.email ?? '';
     }
 
     return Scaffold(
@@ -169,20 +170,34 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ),
                       const SizedBox(height: 10),
 
+                      // CustomTextField(
+                      //   hintText: 'Número celular +593',
+                      //   textEditingController: homeViewModel.phoneController,
+                      //   isKeyboardNumber: true,
+                      //   validator: (value) {
+                      //     // Check if the phone number is empty
+                      //     if (value == null || value.isEmpty) {
+                      //       return 'Por favor ingresa tu número de celular.';
+                      //     }
+                      //     // Validate if the input is exactly 10 digits
+                      //     if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+                      //       return 'El número de celular debe contener 10 dígitos';
+                      //     }
+                      //     return null; // If the input is valid
+                      //   },
+                      // ),
                       CustomTextField(
-                        hintText: 'Número celular +593',
-                        textEditingController: homeViewModel.phoneController,
-                        isKeyboardNumber: true,
-                        validator: (value) {
-                          // Check if the phone number is empty
-                          if (value == null || value.isEmpty) {
-                            return 'Por favor ingresa tu número de celular.';
+                        hintText: "Email (opcional)",
+                        textEditingController: homeViewModel.emailController,
+                        validator: (p0) {
+                          if (p0 != null && p0.isNotEmpty) {
+                            final emailRegex = RegExp(
+                                r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+                            if (!emailRegex.hasMatch(p0)) {
+                              return 'Enter a valid email';
+                            }
                           }
-                          // Validate if the input is exactly 10 digits
-                          if (!RegExp(r'^\d{10}$').hasMatch(value)) {
-                            return 'El número de celular debe contener 10 dígitos';
-                          }
-                          return null; // If the input is valid
+                          return null; // No error if empty (optional field)
                         },
                       ),
 

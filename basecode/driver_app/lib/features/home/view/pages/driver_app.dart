@@ -2,7 +2,6 @@ import 'package:driver_app/features/delivery_request/view/pages/delivery_page_wr
 import 'package:driver_app/features/home/view/widgets/services_issues_alert.dart';
 import 'package:driver_app/features/pending_ride_request/view/pages/pending_ride_request_page.dart';
 import 'package:driver_app/features/ride_request/view/pages/ride_request_page.dart';
-import 'package:driver_app/features/delivery_request/view/pages/delivery_request_page.dart';
 import 'package:driver_app/features/home/viewmodel/home_view_model.dart';
 import 'package:driver_app/shared/providers/shared_provider.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -32,9 +31,9 @@ class _DriverAppState extends State<DriverApp> with WidgetsBindingObserver {
 
   void setDriverValue() {
     logger.f("");
-    final homeViewModel = Provider.of<HomeViewModel>(context, listen: false);
-    homeViewModel.driver =
-        Provider.of<SharedProvider>(context, listen: false).driverModel;
+    // final homeViewModel = Provider.of<HomeViewModel>(context, listen: false);
+    // homeViewModel.driver =
+    //     Provider.of<SharedProvider>(context, listen: false).driverModel;
   }
 
   void checkGpsPermissions() async {

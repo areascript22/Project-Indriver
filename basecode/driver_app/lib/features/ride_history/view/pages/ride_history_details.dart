@@ -5,7 +5,7 @@ import 'package:driver_app/features/ride_history/view/widgets/by_test_details.da
 import 'package:driver_app/features/ride_history/view/widgets/custom_devider.dart';
 import 'package:driver_app/features/ride_history/view/widgets/passenger_info_tile.dart';
 import 'package:driver_app/features/ride_history/viewmodel/ride_history_viewmodel.dart';
-import 'package:driver_app/shared/models/driver.dart';
+import 'package:driver_app/shared/models/g_user.dart';
 import 'package:driver_app/shared/models/request_type.dart';
 import 'package:driver_app/shared/models/ride_history_model.dart';
 import 'package:driver_app/shared/providers/shared_provider.dart';
@@ -25,7 +25,7 @@ class RideHistoryDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final logger = Logger();
     final sharedProvider = Provider.of<SharedProvider>(context);
-    Driver? driver = sharedProvider.driverModel;
+    GUser? driver = sharedProvider.driver;
     if (driver == null) {
       logger.e("Error: There is not driver data");
       return const CircularProgressIndicator(

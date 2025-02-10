@@ -9,19 +9,16 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ListRemoveDriversComponent } from './pages/list-remove-drivers/list-remove-drivers.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import {MatCardModule} from '@angular/material/card';
+import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
-import {
-  MatDialog,
- MatDialogModule,
-} from '@angular/material/dialog';
-
+import { MatSelectModule } from '@angular/material/select';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
     ManageDriversComponent,
     CreateDriverComponent,
-    ListRemoveDriversComponent
+    ListRemoveDriversComponent,
   ],
   imports: [
     CommonModule,
@@ -33,6 +30,7 @@ import {
     MatCardModule,
     MatButtonModule,
     MatDialogModule,
-  ]
+    MatSelectModule,
+  ],
 })
-export class ManageDriversModule { }
+export class ManageDriversModule {}

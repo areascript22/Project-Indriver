@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:driver_app/core/utils/toast_message_util.dart';
 import 'package:driver_app/features/delivery_request/model/delivery_status.dart';
 import 'package:driver_app/features/delivery_request/repositorie/delivery_request_service.dart';
-import 'package:driver_app/features/delivery_request/view/pages/delivery_map_page.dart';
-import 'package:driver_app/features/delivery_request/view/widgets/delivery_star_rating_bottom_sheet.dart';
 import 'package:driver_app/shared/models/delivery_request_model.dart';
 import 'package:driver_app/shared/models/route_info.dart';
 import 'package:driver_app/shared/providers/shared_provider.dart';
@@ -112,7 +110,7 @@ class DeliveryRequestViewModel extends ChangeNotifier {
     bool dataWritten = await DeliveryRequestService.writeDriverDataOnce(
         deliveryRequestModel!.passengerId,
         sharedProvider.driverCurrentPosition!,
-        sharedProvider.driverModel!);
+        sharedProvider.driver!);
     if (dataWritten && deliveryRequestPageContext != null) {
       await sharedUtil.makePhoneVibrate();
       //Navigate to map delivery page

@@ -4,7 +4,6 @@ import 'package:driver_app/shared/models/request_type.dart';
 import 'package:driver_app/shared/providers/shared_provider.dart';
 import 'package:driver_app/features/delivery_request/view/widgets/delivery_request_type.dart';
 import 'package:flutter/material.dart';
-
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 
@@ -90,59 +89,45 @@ class DeliveryRequestListTile extends StatelessWidget {
                     //reqeust type
                     DeliveryRequestTypeCard(
                         requestType: deliveryRequestModel.requestType),
-                    Text(
-                      deliveryRequestModel.information.pickUpLocation,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      deliveryRequestModel.information.dropOffLocation,
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-
-                    //Recipient name
-                    // const SizedBox(height: 4.0),
-                    // Row(
-                    //   children: [
-                    //     Text(
-                    //       'Destinatario',
-                    //       style: TextStyle(
-                    //           color: Colors.grey[600],
-                    //           fontWeight: FontWeight.bold),
-                    //     ),
-                    //     const SizedBox(width: 4.0),
-                    //     Text(
-                    //       '·',
-                    //       style: TextStyle(color: Colors.grey[600]),
-                    //     ),
-                    //     const SizedBox(width: 4.0),
-                    //     Text(
-                    //       deliveryRequestModel.details.recipientName,
-                    //       style: TextStyle(color: Colors.grey[600]),
-                    //     ),
-                    //   ],
-                    // ),
-                    //Package Details
-                    const SizedBox(height: 4.0),
-                    Row(
-                      children: [
-                        Text(
-                          'Detalles',
-                          style: TextStyle(
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(width: 4.0),
-                        Text(
-                          '·',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                        const SizedBox(width: 4.0),
-                        Text(
-                          deliveryRequestModel.details.details,
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
+                    if (deliveryRequestModel.requestType ==
+                        RequestType.byCoordinates)
+                      Column(
+                        children: [
+                          Text(
+                            deliveryRequestModel.information.pickUpLocation,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            deliveryRequestModel.information.dropOffLocation,
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                          const SizedBox(height: 4.0),
+                          Row(
+                            children: [
+                              Text(
+                                'Detalles',
+                                style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 4.0),
+                              Text(
+                                '·',
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                              const SizedBox(width: 4.0),
+                              Flexible(
+                                child: Text(
+                                  deliveryRequestModel.details.details,
+                                  style: TextStyle(color: Colors.grey[600]),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
                   ],
                 ),
               ),

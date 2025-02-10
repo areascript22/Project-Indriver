@@ -1,4 +1,4 @@
-import 'package:driver_app/shared/models/driver.dart';
+import 'package:driver_app/shared/models/g_user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -8,7 +8,8 @@ import 'package:map_launcher/map_launcher.dart';
 import 'package:image/image.dart' as img;
 
 class SharedProvider extends ChangeNotifier {
-  Driver? driverModel; //To user PassengerModel data across multiple Features
+  //Driver? driverModel; //To user PassengerModel data across multiple Features
+  GUser? driver;
   bool isGPSPermissionsEnabled = false;
   Position? driverCurrentPosition;
   String? rideRequestmodel;

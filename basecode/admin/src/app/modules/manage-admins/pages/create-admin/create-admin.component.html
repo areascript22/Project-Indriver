@@ -1,0 +1,244 @@
+<!-- FORM FOR CREATING A NEW DRIVER -->
+<div class="mt-1 form-container">
+  <h2>Crear un nuevo administrador</h2>
+  <form [formGroup]="adminForm" (ngSubmit)="onSubmit()">
+    <!-- Select Profile Image -->
+    <div class="form-group mb-3">
+      <label for="profileImage">Imagen de perfil</label>
+      <br />
+      <input
+        id="profileImage"
+        type="file"
+        (change)="onFileSelected($event)"
+        accept="image/*"
+        formControlName="profileImage"
+      />
+      <div
+        *ngIf="
+          adminForm.controls['profileImage'].invalid &&
+          adminForm.controls['profileImage'].touched
+        "
+      >
+        <p style="color: red">La imagen es requerida</p>
+      </div>
+    </div>
+
+    <!-- Enter Email -->
+    <div class="form-group mb-3">
+      <label for="email">Correo electrónico</label>
+      <input
+        type="email"
+        id="email"
+        class="form-control"
+        formControlName="email"
+        placeholder="Enter email"
+      />
+
+      <div
+        *ngIf="
+          adminForm.get('email')?.hasError('required') &&
+          adminForm.get('email')?.touched
+        "
+        class="text-danger error-label"
+      >
+        El correo electrónico es requerido.
+      </div>
+      <div
+        *ngIf="
+          adminForm.get('email')?.hasError('email') &&
+          adminForm.get('email')?.touched
+        "
+        class="text-danger error-label"
+      >
+        El correo electrónico debe ser válido.
+      </div>
+    </div>
+    <!-- Enter your name -->
+    <div class="form-group mb-3">
+      <label for="name">Nombre</label>
+      <input
+        type="text"
+        id="name"
+        class="form-control"
+        formControlName="name"
+        placeholder="Enter name"
+      />
+
+      <div
+        *ngIf="
+          adminForm.get('name')?.hasError('required') &&
+          adminForm.get('name')?.touched
+        "
+        class="text-danger error-label"
+      >
+        El nombre es requerido.
+      </div>
+    </div>
+
+    <!-- Enter your lastname -->
+    <div class="form-group mb-3">
+      <label for="lastName">Apellido</label>
+      <input
+        type="text"
+        id="lastName"
+        class="form-control"
+        formControlName="lastName"
+        placeholder="Apellido"
+      />
+
+      <div
+        *ngIf="
+          adminForm.get('lastName')?.hasError('required') &&
+          adminForm.get('lastName')?.touched
+        "
+        class="text-danger error-label"
+      >
+        El apellido es requerido.
+      </div>
+    </div>
+
+    <!-- Phone number -->
+    <div class="form-group mb-3">
+      <label for="phone">Número de celular</label>
+      <input
+        type="text"
+        id="phone"
+        class="form-control"
+        formControlName="phone"
+        placeholder="Enter phone number"
+      />
+
+      <div
+        *ngIf="
+          adminForm.get('phone')?.hasError('required') &&
+          adminForm.get('phone')?.touched
+        "
+        class="text-danger error-label"
+      >
+        El número de celular es requerido.
+      </div>
+      <div
+        *ngIf="
+          adminForm.get('phone')?.hasError('pattern') &&
+          adminForm.get('phone')?.touched
+        "
+        class="text-danger error-label"
+      >
+        Numero de celular invalido.
+      </div>
+    </div>
+
+    <!-- Vehicle model -->
+    <!-- <div class="form-group mb-3">
+      <label for="vehicleModel">Modelo de vehículo</label>
+      <input
+        type="text"
+        id="vehicleModel"
+        class="form-control"
+        formControlName="vehicleModel"
+        placeholder="Ingresa el modelo del vehiculo"
+      />
+
+      <div
+        *ngIf="
+          adminForm.get('vehicleModel')?.hasError('required') &&
+          adminForm.get('vehicleModel')?.touched
+        "
+        class="text-danger error-label"
+      >
+        El modelo del vehiculo es requerido.
+      </div>
+    </div> -->
+
+    <!-- Taxi code-->
+    <!-- <div class="form-group mb-3">
+      <label for="taxiCode">Código</label>
+      <input
+        type="text"
+        id="taxiCode"
+        class="form-control"
+        formControlName="taxiCode"
+        placeholder="Ingresa el Código de Taxi"
+      />
+
+      <div
+        *ngIf="
+          adminForm.get('taxiCode')?.hasError('required') &&
+          adminForm.get('taxiCode')?.touched
+        "
+        class="text-danger error-label"
+      >
+        El código de taxi es requerido.
+      </div>
+    </div> -->
+
+    <!-- License-->
+    <!-- <div class="form-group mb-3">
+      <label for="license">Licensia</label>
+      <input
+        type="text"
+        id="license"
+        class="form-control"
+        formControlName="license"
+        placeholder="Ingrese la licencia del conductor"
+      />
+
+      <div
+        *ngIf="
+          adminForm.get('license')?.hasError('required') &&
+          adminForm.get('license')?.touched
+        "
+        class="text-danger error-label"
+      >
+        La licensia es requerido.
+      </div>
+    </div> -->
+
+    <!-- Car registration number (Placa)-->
+    <!-- <div class="form-group mb-3">
+      <label for="registrationNumber">Placa</label>
+      <input
+        type="text"
+        id="registrationNumber"
+        class="form-control"
+        formControlName="carRegistrationNumber"
+        placeholder="Ingresa la placa del Taxi"
+      />
+
+      <div
+        *ngIf="
+          adminForm.get('carRegistrationNumber')?.hasError('required') &&
+          adminForm.get('carRegistrationNumber')?.touched
+        "
+        class="text-danger error-label"
+      >
+        La placa del taxi es requerido.
+      </div>
+    </div> -->
+
+    <!-- <button
+          *ngIf="!loading"
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="driverForm.invalid"
+        >
+          Crear cuenta
+        </button> -->
+
+    <!-- Botón de Enviar -->
+    <div class="">
+      <!-- Spinner -->
+      <mat-spinner [diameter]="40" *ngIf="loading"></mat-spinner>
+
+      <!-- Button -->
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="adminForm.invalid || loading"
+        *ngIf="!loading"
+      >
+        Crear cuenta
+      </button>
+    </div>
+  </form>
+</div>

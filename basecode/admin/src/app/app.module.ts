@@ -25,10 +25,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFireModule } from '@angular/fire/compat';
+import { HttpClientModule } from '@angular/common/http';
+import { MatMenuModule } from '@angular/material/menu';
 
 
 @NgModule({
-  declarations: [AppComponent,],
+  declarations: [AppComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -36,6 +38,8 @@ import { AngularFireModule } from '@angular/fire/compat';
     BrowserAnimationsModule, // required animations module
     MatSnackBarModule,
     MatButtonModule,
+    MatMenuModule,
+    HttpClientModule,
 
     // AngularFireModule.initializeApp(environment.firebaseConfig),
     // AngularFireAuthModule, // Add this if you're using Firebase Auth
@@ -48,9 +52,7 @@ import { AngularFireModule } from '@angular/fire/compat';
     provideFirestore(() => getFirestore()),
     provideDatabase(() => getDatabase()),
     provideStorage(() => getStorage()),
-    provideFirebaseApp(() =>
-      initializeApp(environment.firebaseConfig)
-    ),
+    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
   ],
   bootstrap: [AppComponent],
 })

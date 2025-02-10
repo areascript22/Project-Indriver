@@ -50,21 +50,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAU774UqZTwdjrFuhLag2Pmx2bpyNM6IxM',
-    appId: '1:328876787901:android:ff8010cb732c6348080fd4',
-    messagingSenderId: '328876787901',
-    projectId: 'indriver-clon',
-    databaseURL: 'https://indriver-clon-default-rtdb.firebaseio.com',
-    storageBucket: 'indriver-clon.firebasestorage.app',
+    apiKey: 'AIzaSyDAMJYuaPz5cRQYk6O9EqB-8RBGcKG9gzQ',
+    appId: '1:1029433641745:android:bedeb4023a6fd3efeedab0',
+    messagingSenderId: '1029433641745',
+    projectId: 'taxi-riobamba',
+    storageBucket: 'taxi-riobamba.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCT7lr_vbIAydsc4RXrDzSVX1CnTUFGT0A',
-    appId: '1:328876787901:ios:80816e50006f92f3080fd4',
-    messagingSenderId: '328876787901',
-    projectId: 'indriver-clon',
-    databaseURL: 'https://indriver-clon-default-rtdb.firebaseio.com',
-    storageBucket: 'indriver-clon.firebasestorage.app',
+    apiKey: 'AIzaSyC4Fs9VCwQbAbVXqw2U1d6OGAvKCp5yaEc',
+    appId: '1:1029433641745:ios:21d2c82edd99a56feedab0',
+    messagingSenderId: '1029433641745',
+    projectId: 'taxi-riobamba',
+    storageBucket: 'taxi-riobamba.firebasestorage.app',
     iosBundleId: 'com.example.passengerApp',
   );
 }

@@ -1,14 +1,29 @@
-.content{
-    padding: 24px;
+.content {
+  padding: 24px;
 }
 
-mat-toolbar{
-    position: relative;
-    z-index: 5;
+mat-toolbar {
+  position: relative;
+  z-index: 5;
 }
-mat-sidenav-container{
-    height: calc(100vh - 64px);
+mat-sidenav-container {
+  height: calc(100vh - 64px);
 }
 .spacer {
-    flex: 1 1 auto;
-  }
+  flex: 1 1 auto;
+}
+button[mat-icon-button] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+}
+
+.profile-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}

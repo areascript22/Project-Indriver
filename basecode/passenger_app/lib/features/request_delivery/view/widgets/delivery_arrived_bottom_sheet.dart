@@ -56,19 +56,24 @@ class _DeliveryArrivedBottomSheetState
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            //Message "I have arrived"
-            Text(
-              '${driverModel!.name} ha llegado con su pedido.',
-              style: const TextStyle(fontSize: 18),
-            ),
-            //Vehicle model
-            Text(
-              driverModel.vehicleModel,
-              style: const TextStyle(fontSize: 17),
-            ),
-            const SizedBox(height: 20),
+            if (driverModel != null)
+              Column(
+                children: [
+                  //Message "I have arrived"
+                  Text(
+                    '${driverModel!.name} ha llegado con su pedido.',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  //Vehicle model
+                  Text(
+                    driverModel.vehicleModel,
+                    style: const TextStyle(fontSize: 17),
+                  ),
+                ],
+              ),
 
             //Timer Countdown
+            const SizedBox(height: 20),
             Text(
               formatTime(timeCount),
               style: const TextStyle(

@@ -12,16 +12,20 @@ import 'package:passenger_app/features/request_delivery/view/widgets/delivery_ar
 import 'package:passenger_app/features/request_delivery/view/widgets/driver_has_package_bottom_sheet.dart';
 import 'package:passenger_app/features/request_driver/view/widgets/star_ratings_bottom_sheet.dart';
 import 'package:passenger_app/shared/models/driver_model.dart';
+import 'package:passenger_app/shared/models/request_type.dart';
 import 'package:passenger_app/shared/models/route_info.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
 import 'package:passenger_app/shared/repositories/shared_service.dart';
+import 'package:passenger_app/shared/util/shared_util.dart';
 import 'package:passenger_app/shared/widgets/loading_overlay.dart';
 
 class DeliveryRequestViewModel extends ChangeNotifier {
   final String apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
   final logger = Logger();
+  final sharedUtil = SharedUtil();
   bool _loading = false;
   DeliveryDetailsModel? _deliveryDetailsModel;
+  String requestTypeTemp = RequestType.byCoordinates; //Value by default
 
   //Listeners
   StreamSubscription<DatabaseEvent>? driverStatusListener;
@@ -64,21 +68,12 @@ class DeliveryRequestViewModel extends ChangeNotifier {
       builder: (context) => const LoadingOverlay(),
     );
     overlay.insert(overlayEntry);
-
     // Create a DeliveryDetailsModel instance
+    requestTypeTemp = requestType;
     try {
       loading = true;
       //get Passenger id
       String passengerId = FirebaseAuth.instance.currentUser!.uid;
-
-      // final DeliveryDetailsModel? deliveryDetails;
-      // if(deliveryDetailsModel!=null){
-      //   deliveryDetails = DeliveryDetailsModel(
-      //   recipientName: deliveryDetailsModel!.recipientName,
-      //   details: deliveryDetailsModel!.details,
-      // );
-      // }
-
       bool dataWritten = await RequestDeliveryService.writeToDatabase(
         requestType: requestType,
         passengerId: passengerId,
@@ -111,8 +106,10 @@ class DeliveryRequestViewModel extends ChangeNotifier {
           databaseRef.onValue.listen((DatabaseEvent event) async {
         // Check if the snapshot has data
         if (event.snapshot.exists) {
+          sharedUtil.makePhoneVibrate();
           //Fetch driver
           final driverMap = event.snapshot.value as Map;
+          logger.f("Id: $passengerId  ,Driver MAP: ${driverMap}");
           //Get key and body
           String? driverId;
           DriverModel? driver;
@@ -134,6 +131,8 @@ class DeliveryRequestViewModel extends ChangeNotifier {
           _listenToDriverCoordenates(passengerId, driverId, sharedProvider);
           //Start Delivery Request Status Listener
           _listenToDeliveryRequestStatus(passengerId, sharedProvider);
+          logger
+              .i("Driver retrieved succesfully: ${sharedProvider.driverModel}");
         } else {
           logger.i('There is no drivers ');
         }
@@ -177,27 +176,23 @@ class DeliveryRequestViewModel extends ChangeNotifier {
               sharedProvider.deliveryStatus = DeliveryStatus.finished;
 
               //Rate the driver
-              showStarRatingsBottomSheet(sharedProvider.mapPageContext!,
-                  sharedProvider.driverModel!.id);
+              if (sharedProvider.driverModel != null) {
+                showStarRatingsBottomSheet(sharedProvider.mapPageContext!,
+                    sharedProvider.driverModel!.id);
+              }
 
               //Return to normal state of the appp
               sharedProvider.driverModel = null;
               sharedProvider.dropOffCoordenates = null;
-
               sharedProvider.dropOffLocation = null;
-
               sharedProvider.pickUpCoordenates = null;
-
               sharedProvider.pickUpLocation = null;
-
               sharedProvider.selectingPickUpOrDropOff = true;
-
               sharedProvider.duration = null;
-
               sharedProvider.markers.clear();
-
               sharedProvider.polylineFromPickUpToDropOff =
                   const Polyline(polylineId: PolylineId("default"));
+              clearListeners();
 
               break;
             default:
@@ -235,6 +230,10 @@ class DeliveryRequestViewModel extends ChangeNotifier {
               icon: sharedProvider.driverIcon ?? BitmapDescriptor.defaultMarker,
               position: driverCoords);
           //Update Polyline (Route from Driver to a dynamic destination)
+          if (requestTypeTemp != RequestType.byCoordinates) {
+            //Don't redraw route if there is not coordinates
+            return;
+          }
           LatLng destination = sharedProvider.pickUpCoordenates!;
           if (sharedProvider.deliveryStatus == DeliveryStatus.haveThePackage) {
             destination = sharedProvider.dropOffCoordenates!;

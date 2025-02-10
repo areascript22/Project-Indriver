@@ -33,6 +33,13 @@ class PassengerInfoTile extends StatelessWidget {
               child:
                   Text('No se pudo recuperar los datos. Intentalo mas tarde.'));
         } else {
+          if (snapshot.data == null) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Colors.red,
+              ),
+            );
+          }
           PassengerModel passenger = snapshot.data!;
           return Column(
             children: [

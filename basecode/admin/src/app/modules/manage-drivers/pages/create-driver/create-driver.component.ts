@@ -14,11 +14,12 @@ import {
 
 import { AuthService } from '../../../auth/services/auth.service';
 import { FirestoreService } from '../../../../shared/services/firestore/firestore.service';
-import { Driver } from '../../../../data/interfaces/driver.interface';
+import { GUser } from '../../../../data/interfaces/driver.interface';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Vehicle } from '../../../../data/interfaces/vehicle.interface';
 import { Ratings } from '../../../../data/interfaces/ratings.interface';
 import { Roles } from '../../../../shared/utils/roles';
+import { Access } from '../../../../shared/utils/access';
 
 @Component({
   selector: 'app-create-driver',
@@ -38,18 +39,19 @@ export class CreateDriverComponent {
     private authService: AuthService,
     private firestoreService: FirestoreService,
     private storage: Storage,
-    private matSnackBar:MatSnackBar,
+    private matSnackBar: MatSnackBar
   ) {
     //Init forms
     this.driverForm = this.formBuilder.group({
       profileImage: ['', this.fileValidator],
       email: ['', [Validators.required, Validators.email]],
       name: ['', Validators.required],
+      lastName: ['', Validators.required],
       phone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]], // Validates 10 digit phone number
       vehicleModel: ['', Validators.required],
       taxiCode: ['', [Validators.required]],
       carRegistrationNumber: ['', [Validators.required]],
-      license:['',[Validators.required]],
+      license: ['', [Validators.required]],
     });
   }
 
@@ -61,11 +63,12 @@ export class CreateDriverComponent {
 
   //Submit Form
   async onSubmit() {
-    this.loading=true;
+    this.loading = true;
     //get data from Form
     const {
       email,
       name,
+      lastName,
       phone,
       vehicleModel,
       taxiCode,
@@ -75,8 +78,10 @@ export class CreateDriverComponent {
     const file = this.selectedFile;
     //Check if there is an selected image
     if (!file) {
-      this.loading=false;
-      this.matSnackBar.open('Selecciona una imagen', 'Error',{duration:4000});
+      this.loading = false;
+      this.matSnackBar.open('Selecciona una imagen', 'Error', {
+        duration: 4000,
+      });
       return;
     }
 
@@ -85,11 +90,11 @@ export class CreateDriverComponent {
       phone
     );
     if (phoneAlreadyExist == null) {
-      this.loading=false;
+      this.loading = false;
       return;
     }
     if (phoneAlreadyExist) {
-      this.loading=false;
+      this.loading = false;
       return;
     }
     //Generate temp password of twelve characters
@@ -98,10 +103,10 @@ export class CreateDriverComponent {
     //Create Driver account
     const driverCredentials = await this.authService.createDriverAccount(
       email,
-      tempPassword,
+      tempPassword
     );
     if (driverCredentials == null) {
-      this.loading=false;
+      this.loading = false;
       return;
     }
 
@@ -112,40 +117,43 @@ export class CreateDriverComponent {
     const driverId = driverCredentials.user?.uid;
 
     //Upload profile image
-    const filePath = `profile_image/drivers/${driverId}`;
+    const filePath = `users/profile_image/${driverId}`;
     const storageRef = ref(this.storage, filePath);
     const uploadTask = await uploadBytesResumable(storageRef, file!);
     const downloadUrl = await getDownloadURL(uploadTask.ref);
 
     //Define Vahicle fields
-    const vehicle:Vehicle={
-      code:taxiCode,
-      model:vehicleModel,
-      carRegistrationNumber:carRegistrationNumber,
-    }
+    const vehicle: Vehicle = {
+      license: license,
+      taxiCode: taxiCode,
+      model: vehicleModel,
+      carRegistrationNumber: carRegistrationNumber,
+    };
 
     //Define Ratings
-    const ratings:Ratings  ={
-      rating:0,
-      ratingCount:0,
-      totalRatingScore:0,
-    }
+    const ratings: Ratings = {
+      rating: 0,
+      ratingCount: 0,
+      totalRatingScore: 0,
+    };
 
     //Save driver data in Firestore
-    const driver: Driver = {
+    let formatedPhone = phone.replace(/^0/, '');
+    const driver: GUser = {
       id: driverId,
       email,
       name,
-      phone,
+      lastName: lastName ?? '',
+      phone: '+593' + formatedPhone,
       profilePicture: downloadUrl,
-      vehicle:vehicle,
-      ratings:ratings,
-      license:license,
-      role:Roles.driver,
+      vehicle: vehicle,
+      ratings: ratings,
+      role: [Roles.driver],
+      access: Access.granted,
     };
 
     await this.firestoreService.saveDriverData(driver);
-    this.loading=false;
+    this.loading = false;
   }
 
   //Generate a temp password for driver account creating
@@ -160,8 +168,8 @@ export class CreateDriverComponent {
     }
     return password;
   }
-   //Detect when an image file is selected
-   onFileSelected(event: any) {
+  //Detect when an image file is selected
+  onFileSelected(event: any) {
     this.selectedFile = event.target.files[0];
     console.log('A file was selected ');
     console.log(this.selectedFile);

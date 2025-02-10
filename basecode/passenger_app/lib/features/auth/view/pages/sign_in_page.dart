@@ -43,8 +43,7 @@ class _SignInPageState extends State<SignInPage> {
       setState(() {
         isloading = true;
       });
-      await FirebaseAuth.instance
-          .verifyPhoneNumber(
+      await FirebaseAuth.instance.verifyPhoneNumber(
         timeout: const Duration(seconds: 60),
         phoneNumber: "+593${textController.text}",
         verificationCompleted: (phoneAuthCredential) {},
@@ -57,6 +56,8 @@ class _SignInPageState extends State<SignInPage> {
           setState(() {});
         },
         codeSent: (verificationId, forceResendingToken) {
+          _logger
+              .i("Code has been sent: ${verificationId}, $forceResendingToken");
           //Navegamos a la pantallad e verificacion del codigo sms
           setState(() {
             isloading = false;
@@ -71,13 +72,6 @@ class _SignInPageState extends State<SignInPage> {
         },
         codeAutoRetrievalTimeout: (verificationId) {
           _logger.i("Auto Retrieval Timeout.. $verificationId");
-        },
-      )
-          .timeout(
-        const Duration(seconds: 7),
-        onTimeout: () {
-          ToastMessageUtil.showToast(
-              "Tiempo de espera de red agotado. Por favor intente de nuevo.");
         },
       );
     }

@@ -68,8 +68,7 @@ class _RequestDeliveryBottomSheetState extends State<RequestDeliveryBottomSheet>
   @override
   Widget build(BuildContext context) {
     final sharedProvider = Provider.of<SharedProvider>(context);
-    final deliveryRequestViewModel =
-        Provider.of<DeliveryRequestViewModel>(context);
+  
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

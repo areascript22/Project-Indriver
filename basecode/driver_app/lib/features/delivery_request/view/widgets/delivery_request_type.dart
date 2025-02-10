@@ -1,5 +1,6 @@
 import 'package:driver_app/shared/models/request_type.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
 class DeliveryRequestTypeCard extends StatelessWidget {
   final String requestType;
@@ -10,19 +11,21 @@ class DeliveryRequestTypeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String requestType = '';
+    final logger = Logger();
+    logger.i("Reqeust Type: ${requestType}");
+    String requestTypeT = '';
     switch (requestType) {
       case RequestType.byCoordinates:
-        requestType = "Coordenadas";
+        requestTypeT = "Coordenadas";
         break;
       case RequestType.byRecordedAudio:
-        requestType = "Mensaje de voz";
+        requestTypeT = "Mensaje de voz";
         break;
       case RequestType.byTexting:
-        requestType = "Mensaje de texto";
+        requestTypeT = "Mensaje de texto";
         break;
       default:
-        requestType = "Por defecto";
+        requestTypeT = "Por defecto";
         break;
     }
     return Container(
@@ -32,7 +35,7 @@ class DeliveryRequestTypeCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12), // Rounded corners
       ),
       child: Text(
-        requestType, // Example request type
+        requestTypeT, // Example request type
         style: TextStyle(
           fontSize: 14,
           color: Colors.blue[800], // Dark blue text

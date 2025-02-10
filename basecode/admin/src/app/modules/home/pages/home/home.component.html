@@ -1,25 +1,39 @@
 <mat-toolbar class="mat-elevation-z3">
   <button mat-icon-button (click)="collapsed.set(!collapsed())">
-    <mat-icon >menu</mat-icon>
+    <mat-icon>menu</mat-icon>
   </button>
   <!-- Spacer pushes content to the right -->
   <span class="spacer"></span>
 
-  <!-- Right-side button -->
-  <button mat-raised-button color="warn" (click)="signOut()">
-    Cerrar sesión
+  <!-- image -->
+  <button mat-icon-button [matMenuTriggerFor]="userMenu">
+    <img [src]="gUser?.profilePicture" class="profile-img" alt="User" />
   </button>
-  
+
+  <mat-menu #userMenu="matMenu">
+    <button mat-menu-item (click)="viewProfile()">
+      <mat-icon>person</mat-icon> Ver perfil
+    </button>
+    <button mat-menu-item (click)="settings()">
+      <mat-icon>settings</mat-icon> Configuración
+    </button>
+    <button mat-menu-item (click)="signOut()">
+      <mat-icon>exit_to_app</mat-icon> Cerrar sesión
+    </button>
+  </mat-menu>
+
+  <!-- Right-side button -->
+  <!-- <button mat-raised-button color="warn" (click)="signOut()">
+    Cerrar sesión
+  </button> -->
 </mat-toolbar>
 
 <mat-sidenav-container>
   <mat-sidenav opened="" mode="side" [style.width]="sideNavWidth()">
-    <app-custom-sidenav [collapsed]="collapsed()">
-
-    </app-custom-sidenav>
+    <app-custom-sidenav [collapsed]="collapsed()"> </app-custom-sidenav>
   </mat-sidenav>
-  
-  <mat-sidenav-content class="content" [style.margin-left]="sideNavWidth()"> 
+
+  <mat-sidenav-content class="content" [style.margin-left]="sideNavWidth()">
     <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>

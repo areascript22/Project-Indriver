@@ -1,5 +1,6 @@
-export interface Vehicle{
-    code:string, 
-    model:string,
-    carRegistrationNumber:string, //placa
+export interface Vehicle {
+  taxiCode: string;
+  model: string;
+  license: string;
+  carRegistrationNumber: string; //placa
 }

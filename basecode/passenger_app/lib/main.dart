@@ -2,7 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:passenger_app/core/theme/theme.dart';
-import 'package:passenger_app/features/auth/view/pages/auth_wrapper.dart';
 import 'package:passenger_app/features/auth/view/pages/splash_screen_page.dart';
 import 'package:passenger_app/features/auth/viewmodel/passenger_viewmodel.dart';
 import 'package:passenger_app/features/home/viewmodel/home_view_model.dart';

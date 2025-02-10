@@ -18,6 +18,7 @@ export class AuthService {
 
   //Sign in with Email and Password
   async signIn(email: string, password: string): Promise<any> {
+    
     try {
       const userCredential = await this.afAuth.signInWithEmailAndPassword(
         email,

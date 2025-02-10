@@ -10,6 +10,7 @@ import 'package:passenger_app/features/auth/repositories/passenger_servide.dart'
 
 class PassengerViewModel extends ChangeNotifier {
   final Logger logger = Logger();
+  final _auth = FirebaseAuth.instance;
   String? phoneNumber;
   String? verificationId;
   bool _loading = false;
@@ -41,6 +42,7 @@ class PassengerViewModel extends ChangeNotifier {
     return false;
   }
 
+  //get the current authenticated user
   Future<GUser?> getAuthenticatedPassengerData() async {
     return PassengerService.getUserData();
   }
@@ -63,10 +65,7 @@ class PassengerViewModel extends ChangeNotifier {
   }
 
 //To verifiy code SMS
-  void verifySms(
-    String smsCode,
-    BuildContext context,
-  ) async {
+  void verifySms(String smsCode, BuildContext context) async {
     loading = true;
     if (verificationId == null) {
       loading = false;
@@ -88,5 +87,39 @@ class PassengerViewModel extends ChangeNotifier {
       loading = false;
     }
     loading = false;
+  }
+
+  Future<void> loginWithPhoneNumber(
+      String phoneNumber,
+      Function(String verificationId) onCodeSent,
+      Function(String error) onError) async {
+    try {
+      await _auth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        timeout: const Duration(seconds: 60),
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          // Auto-retrieve or instant verification (for Android)
+          await _auth.signInWithCredential(credential);
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          onError(e.message ?? "Verification failed");
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          onCodeSent(verificationId);
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {},
+      );
+    } catch (e) {
+      onError(e.toString());
+    }
+  }
+
+  Future<UserCredential> verifyOTP(
+      String verificationId, String otpCode) async {
+    PhoneAuthCredential credential = PhoneAuthProvider.credential(
+      verificationId: verificationId,
+      smsCode: otpCode,
+    );
+    return await _auth.signInWithCredential(credential);
   }
 }

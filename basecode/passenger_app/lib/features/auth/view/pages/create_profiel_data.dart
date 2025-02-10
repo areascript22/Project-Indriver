@@ -1,6 +1,4 @@
 import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,10 +6,10 @@ import 'package:logger/logger.dart';
 import 'package:passenger_app/features/home/view/pages/passenger_app.dart';
 import 'package:passenger_app/shared/models/g_user.dart';
 import 'package:passenger_app/shared/models/passenger_model.dart';
+import 'package:passenger_app/shared/providers/shared_provider.dart';
 import 'package:passenger_app/shared/widgets/custom_elevated_button.dart';
 import 'package:passenger_app/shared/widgets/custom_testfield.dart';
 import 'package:passenger_app/features/auth/viewmodel/passenger_viewmodel.dart';
-import 'package:passenger_app/shared/providers/shared_provider.dart';
 import 'package:provider/provider.dart';
 
 class CreateProfileData extends StatefulWidget {
@@ -31,6 +29,7 @@ class _CreateProfileDataState extends State<CreateProfileData> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _lastnameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   bool isLoading = false;
 
   @override
@@ -143,20 +142,35 @@ class _CreateProfileDataState extends State<CreateProfileData> {
                 ),
                 const SizedBox(height: 10),
 
+                // CustomTextField(
+                //   hintText: 'Número celular +593',
+                //   textEditingController: _phoneController,
+                //   isKeyboardNumber: true,
+                //   validator: (value) {
+                //     // Check if the phone number is empty
+                //     if (value == null || value.isEmpty) {
+                //       return 'Por favor ingresa tu número de celular.';
+                //     }
+                //     // Validate if the input is exactly 10 digits
+                //     if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+                //       return 'El número de celular debe contener 10 dígitos';
+                //     }
+                //     return null; // If the input is valid
+                //   },
+                // ),
+                //Email optional field
                 CustomTextField(
-                  hintText: 'Número celular +593',
-                  textEditingController: _phoneController,
-                  isKeyboardNumber: true,
-                  validator: (value) {
-                    // Check if the phone number is empty
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingresa tu número de celular.';
+                  hintText: "Email (opcional)",
+                  textEditingController: _emailController,
+                  validator: (p0) {
+                    if (p0 != null && p0.isNotEmpty) {
+                      final emailRegex = RegExp(
+                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+                      if (!emailRegex.hasMatch(p0)) {
+                        return 'Enter a valid email';
+                      }
                     }
-                    // Validate if the input is exactly 10 digits
-                    if (!RegExp(r'^\d{10}$').hasMatch(value)) {
-                      return 'El número de celular debe contener 10 dígitos';
-                    }
-                    return null; // If the input is valid
+                    return null; // No error if empty (optional field)
                   },
                 ),
 
@@ -194,11 +208,13 @@ class _CreateProfileDataState extends State<CreateProfileData> {
                           id: authInstance.currentUser!.uid,
                           name: _nameController.text,
                           lastName: _lastnameController.text,
-                          email: authInstance.currentUser!.email ?? '',
-                          phone: _phoneController.text,
+                          email: _emailController.text,
+                          phone:
+                              authInstance.currentUser!.phoneNumber.toString(),
                           profilePicture: profilePicture ?? '',
                           ratings: ratings,
-                          role: ["passenger"],
+                          role: [Roles.passenger],
+                          access: Access.granted,
                         );
 
                         //Save data in firestore
@@ -208,8 +224,8 @@ class _CreateProfileDataState extends State<CreateProfileData> {
                         //Navigato to Map Page
                         if (dataSaved) {
                           //Update values on Providers
-                          // passengerViewModel.passenger = passenger;
-                          // sharedProvider.passengerModel = passenger;
+                          sharedProvider.passenger = passenger;
+
                           if (context.mounted) {
                             Navigator.push(
                               context,

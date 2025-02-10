@@ -11,14 +11,19 @@ import { MatButtonModule } from '@angular/material/button';
 import { DialogEditComponent } from './components/dialogs/dialog-edit/dialog-edit.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
-
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { DialogEditAdminComponent } from './components/dialogs/dialog-edit-admin/dialog-edit-admin.component';
+import { DialogEditPassengerComponent } from './components/dialogs/dialog-edit-passenger/dialog-edit-passenger.component';
 
 @NgModule({
   declarations: [
     CustomSidenavComponent,
     DialogBodyComponent,
-    DialogEditComponent
+    DialogEditComponent,
+    DialogEditAdminComponent,
+    DialogEditPassengerComponent,
   ],
   imports: [
     CommonModule,
@@ -29,9 +34,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatButtonModule,
     ReactiveFormsModule,
     MatProgressSpinnerModule,
+    MatFormFieldModule,
+    MatSelectModule,
   ],
-  exports:[
-    CustomSidenavComponent,
-  ]
+  exports: [CustomSidenavComponent],
 })
-export class SharedModule { }
+export class SharedModule {}

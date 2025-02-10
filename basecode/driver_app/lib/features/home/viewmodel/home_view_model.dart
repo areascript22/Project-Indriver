@@ -193,7 +193,7 @@ class HomeViewModel extends ChangeNotifier {
       sharedProvider.driverCurrentPosition = currentPosition;
       //Write initial data in realtime database
       await HomeRealtimeDBService.writeOrUpdateLocationInFirebase(
-          currentPosition, sharedProvider.driverModel!);
+          currentPosition, sharedProvider.driver!);
       logger.f("Current location catched : $currentPosition");
       isCurrentLocationAvailable = true;
     } catch (e) {
@@ -207,7 +207,7 @@ class HomeViewModel extends ChangeNotifier {
         sharedProvider.driverCurrentPosition = cPosition;
         isCurrentLocationAvailable = true;
         await HomeRealtimeDBService.writeOrUpdateLocationInFirebase(
-            cPosition, sharedProvider.driverModel!);
+            cPosition, sharedProvider.driver!);
       }
     }
     // Listen for location updates
@@ -222,9 +222,9 @@ class HomeViewModel extends ChangeNotifier {
       isCurrentLocationAvailable = true;
       sharedProvider.driverCurrentPosition = position;
       await HomeRealtimeDBService.writeOrUpdateLocationInFirebase(
-          position, sharedProvider.driverModel!);
-      logger.f(
-          "Listener Location updated: ${position.latitude}, ${position.longitude}");
+          position, sharedProvider.driver!);
+      // logger.f(
+      //     "Listener Location updated: ${position.latitude}, ${position.longitude}");
     }, onError: (error) {
       // If there is an error, update the flag to false
       isCurrentLocationAvailable = false;

@@ -89,6 +89,7 @@ class _DeliveryRequestPageState extends State<DeliveryRequestPage> {
                 logger.i("request body: ${entriesToBuild[index].value}");
                 final deliveryRequestModel =
                     DeliveryRequestModel.fromMap(requestBody, requestKey);
+                logger.f("Reqeust model: ${deliveryRequestModel.requestType}");
 
                 return DeliveryRequestListTile(
                     deliveryRequestModel: deliveryRequestModel);

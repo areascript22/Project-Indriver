@@ -1,0 +1,275 @@
+<h2 mat-dialog-title>Editar pasajero</h2>
+
+<mat-dialog-content>
+  <!-- FORM FOR CREATING A NEW DRIVER -->
+  <div class="mt-1 form-container">
+    <form [formGroup]="driverForm">
+      <!-- Select Profile Image -->
+      <div class="form-group mb-3 text-center">
+        <label for="profileImage">Imagen de perfil</label>
+        <br />
+        <div class="avatar-container">
+          <img
+            [src]="selectedImage || data.profilePicture"
+            alt="Profile Avatar"
+            class="avatar"
+            (click)="triggerFileInput()"
+          />
+        </div>
+        <input
+          id="profileImage"
+          type="file"
+          (change)="onFileSelected($event)"
+          accept="image/*"
+          formControlName="profileImage"
+          hidden
+          #fileInput
+        />
+        <div
+          *ngIf="
+            driverForm.controls['profileImage'].invalid &&
+            driverForm.controls['profileImage'].touched
+          "
+        >
+          <p style="color: red">La imagen es requerida</p>
+        </div>
+      </div>
+
+      <!-- Enter Email -->
+      <div class="form-group mb-3">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          class="form-control"
+          formControlName="email"
+          placeholder="Enter email"
+        />
+
+        <div
+          *ngIf="
+            driverForm.get('email')?.hasError('required') &&
+            driverForm.get('email')?.touched
+          "
+          class="text-danger error-label"
+        >
+          El Email es requerido.
+        </div>
+        <div
+          *ngIf="
+            driverForm.get('email')?.hasError('email') &&
+            driverForm.get('email')?.touched
+          "
+          class="text-danger error-label"
+        >
+          El Email debe ser válido.
+        </div>
+      </div>
+      <!-- Enter your name -->
+      <div class="form-group mb-3">
+        <label for="name">Nombre</label>
+        <input
+          type="text"
+          id="name"
+          class="form-control"
+          formControlName="name"
+          placeholder="Enter name"
+        />
+
+        <div
+          *ngIf="
+            driverForm.get('name')?.hasError('required') &&
+            driverForm.get('name')?.touched
+          "
+          class="text-danger error-label"
+        >
+          El nombre es requerido.
+        </div>
+      </div>
+
+      <!-- Enter your lastname -->
+      <div class="form-group mb-3">
+        <label for="lastname">Apellido</label>
+        <input
+          type="text"
+          id="lastname"
+          class="form-control"
+          formControlName="lastname"
+          placeholder="Ingresa el nombre"
+        />
+
+        <div
+          *ngIf="
+            driverForm.get('lastname')?.hasError('required') &&
+            driverForm.get('lastname')?.touched
+          "
+          class="text-danger error-label"
+        >
+          El apellido es requerido.
+        </div>
+      </div>
+
+      <!-- Phone number -->
+      <div class="form-group mb-3">
+        <label for="phone">Número de celular</label>
+        <input
+          type="text"
+          id="phone"
+          class="form-control"
+          formControlName="phone"
+          placeholder="Enter phone number"
+        />
+
+        <div
+          *ngIf="
+            driverForm.get('phone')?.hasError('required') &&
+            driverForm.get('phone')?.touched
+          "
+          class="text-danger error-label"
+        >
+          El número de celular es requerido.
+        </div>
+        <div
+          *ngIf="
+            driverForm.get('phone')?.hasError('pattern') &&
+            driverForm.get('phone')?.touched
+          "
+          class="text-danger error-label"
+        >
+          Numero de celular invalido.
+        </div>
+      </div>
+
+      <!-- Vehicle model -->
+      <!-- <div class="form-group mb-3">
+        <label for="vehicleModel">Modelo de vehículo</label>
+        <input
+          type="text"
+          id="vehicleModel"
+          class="form-control"
+          formControlName="vehicleModel"
+          placeholder="Ingresa el modelo del vehiculo"
+        />
+
+        <div
+          *ngIf="
+            driverForm.get('vehicleModel')?.hasError('required') &&
+            driverForm.get('vehicleModel')?.touched
+          "
+          class="text-danger error-label"
+        >
+          El modelo del vehiculo es requerido.
+        </div>
+      </div> -->
+
+      <!-- Taxi code-->
+      <!-- <div class="form-group mb-3">
+        <label for="taxiCode">Código</label>
+        <input
+          type="text"
+          id="taxiCode"
+          class="form-control"
+          formControlName="taxiCode"
+          placeholder="Ingresa el Código de Taxi"
+        />
+
+        <div
+          *ngIf="
+            driverForm.get('taxiCode')?.hasError('required') &&
+            driverForm.get('taxiCode')?.touched
+          "
+          class="text-danger error-label"
+        >
+          El código de taxi es requerido.
+        </div>
+      </div> -->
+
+      <!-- License-->
+      <!-- <div class="form-group mb-3">
+        <label for="license">Licensia</label>
+        <input
+          type="text"
+          id="license"
+          class="form-control"
+          formControlName="license"
+          placeholder="Ingrese la licencia del conductor"
+        />
+
+        <div
+          *ngIf="
+            driverForm.get('license')?.hasError('required') &&
+            driverForm.get('license')?.touched
+          "
+          class="text-danger error-label"
+        >
+          La licensia es requerido.
+        </div>
+      </div> -->
+
+      <!-- Car registration number (Placa)-->
+      <!-- <div class="form-group mb-3">
+        <label for="registrationNumber">Placa</label>
+        <input
+          type="text"
+          id="registrationNumber"
+          class="form-control"
+          formControlName="carRegistrationNumber"
+          placeholder="Ingresa la placa del Taxi"
+        />
+
+        <div
+          *ngIf="
+            driverForm.get('carRegistrationNumber')?.hasError('required') &&
+            driverForm.get('carRegistrationNumber')?.touched
+          "
+          class="text-danger error-label"
+        >
+          La placa del taxi es requerido.
+        </div>
+      </div> -->
+
+      <!-- Add this inside the <form> tag, as the last field before closing the form -->
+      <div class="form-group mb-3">
+        <label for="accessStatus">Acceso del pasajero</label>
+        <br />
+        <mat-form-field appearance="outline" class="full-width">
+          <!-- <mat-label>Seleccionar acceso</mat-label> -->
+          <mat-select formControlName="accessStatus">
+            <mat-option value="granted">Acceso permitido</mat-option>
+            <mat-option value="denied">Acceso denegado</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Validation Message -->
+        <div
+          *ngIf="
+            driverForm.get('accessStatus')?.hasError('required') &&
+            driverForm.get('accessStatus')?.touched
+          "
+          class="text-danger error-label"
+        >
+          Debes seleccionar una opción.
+        </div>
+      </div>
+    </form>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <!-- Botón de Enviar -->
+  <div class="">
+    <!-- Spinner -->
+    <mat-spinner [diameter]="40" *ngIf="loading"></mat-spinner>
+
+    <!-- Button -->
+    <button
+      class="btn btn-primary"
+      [disabled]="(!canSaveChanges() && driverForm.valid) || loading"
+      *ngIf="!loading"
+      (click)="saveData()"
+    >
+      Guardar cambios
+    </button>
+  </div>
+
+  <button mat-button (click)="closeEditingData()">Cancelar</button>
+</mat-dialog-actions>

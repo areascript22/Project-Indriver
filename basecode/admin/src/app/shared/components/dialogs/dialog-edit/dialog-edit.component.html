@@ -87,6 +87,28 @@
         </div>
       </div>
 
+      <!-- Enter your lastname -->
+      <div class="form-group mb-3">
+        <label for="lastname">Apellido</label>
+        <input
+          type="text"
+          id="lastname"
+          class="form-control"
+          formControlName="lastname"
+          placeholder="Enter name"
+        />
+
+        <div
+          *ngIf="
+            driverForm.get('lastname')?.hasError('required') &&
+            driverForm.get('lastname')?.touched
+          "
+          class="text-danger error-label"
+        >
+          El nombre es requerido.
+        </div>
+      </div>
+
       <!-- Phone number -->
       <div class="form-group mb-3">
         <label for="phone">Número de celular</label>
@@ -203,6 +225,30 @@
           class="text-danger error-label"
         >
           La placa del taxi es requerido.
+        </div>
+      </div>
+
+      <!-- Add this inside the <form> tag, as the last field before closing the form -->
+      <div class="form-group mb-3">
+        <label for="accessStatus">Acceso del conductor</label>
+        <br />
+        <mat-form-field appearance="outline" class="full-width">
+          <!-- <mat-label>Seleccionar acceso</mat-label> -->
+          <mat-select formControlName="accessStatus">
+            <mat-option value="granted">Acceso permitido</mat-option>
+            <mat-option value="denied">Acceso denegado</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Validation Message -->
+        <div
+          *ngIf="
+            driverForm.get('accessStatus')?.hasError('required') &&
+            driverForm.get('accessStatus')?.touched
+          "
+          class="text-danger error-label"
+        >
+          Debes seleccionar una opción.
         </div>
       </div>
     </form>

@@ -1,15 +1,16 @@
-import { Roles } from "../../shared/utils/roles";
-import { Ratings } from "./ratings.interface";
-import { Vehicle } from "./vehicle.interface";
+import { Roles } from '../../shared/utils/roles';
+import { Ratings } from './ratings.interface';
+import { Vehicle } from './vehicle.interface';
 
-export  interface Driver {
-  id: string;
-  email: string;
+export interface GUser {
+  id?: string;
+  email?: string;
   name: string;
+  lastName?: string;
   phone: string;
-  profilePicture:string,
-  license: string;
-  vehicle:Vehicle,
-  ratings:Ratings,
-  role:Roles
+  profilePicture: string;
+  ratings: Ratings;
+  role: String[];
+  vehicle?: Vehicle;
+  access: String; //Granted, Denied
 }

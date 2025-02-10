@@ -1,5 +1,5 @@
 import 'package:driver_app/core/theme/theme.dart';
-import 'package:driver_app/features/auth/view/pages/auth_wrapper_page.dart';
+import 'package:driver_app/features/auth/view/pages/splash_screen.dart';
 import 'package:driver_app/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:driver_app/features/delivery_request/viewmodel/delivery_request_viewmodel.dart';
 import 'package:driver_app/features/home/viewmodel/home_view_model.dart';
@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: lightMode,
       darkTheme: darkMode,
-      home: const AuthWrapper(),
+      home: const SplashScreen(),
     );
   }
 }

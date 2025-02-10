@@ -1,17 +1,25 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { Driver } from '../../../data/interfaces/driver.interface';
+import { GUser } from '../../../data/interfaces/driver.interface';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { map, Observable } from 'rxjs';
+import { firstValueFrom, map, Observable } from 'rxjs';
 import { collection } from '@angular/fire/firestore';
+import { HttpClient } from '@angular/common/http';
+import { user } from '@angular/fire/auth';
+import { access } from 'fs';
+import { deleteObject, ref, Storage } from '@angular/fire/storage';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FirestoreService {
+  private baseUrl = 'https://deleteuser-4wrgni2wda-uc.a.run.app'; //To delete authenticated user
+
   constructor(
     private firestore: AngularFirestore,
-    private matSnackBar: MatSnackBar
+    private storage: Storage,
+    private matSnackBar: MatSnackBar,
+    private http: HttpClient
   ) {}
 
   //Check if the phone number already exists
@@ -37,20 +45,24 @@ export class FirestoreService {
   }
 
   //Save driver's data in Firestore
-  async saveDriverData(driver: Driver): Promise<void> {
+  async saveDriverData(driver: GUser): Promise<void> {
     try {
       // Save user data
-      await this.firestore.collection('drivers').doc(driver.id).set({
-        email: driver.email,
-        name: driver.name,
-        profilePicture: driver.profilePicture,
-        phone: driver.phone,
-        vehicle: driver.vehicle,
-        license: driver.license,
-        ratings: driver.ratings,
-        role: driver.role,
-      });
-      this.matSnackBar.open('Conductor creado Correctamente', 'Cerrar', {
+      await this.firestore
+        .collection('g_user')
+        .doc(driver.id)
+        .set({
+          email: driver.email,
+          name: driver.name,
+          lastName: driver.lastName ?? '',
+          profilePicture: driver.profilePicture,
+          phone: driver.phone,
+          vehicle: driver.vehicle,
+          ratings: driver.ratings,
+          role: driver.role,
+          access: driver.access,
+        });
+      this.matSnackBar.open('Usuario creado Correctamente', 'Cerrar', {
         duration: 4000,
       });
     } catch (error: any) {
@@ -62,8 +74,8 @@ export class FirestoreService {
     }
   }
 
-  //Update data 
-  async updateDriverData(driver: Driver): Promise<void> {
+  //Update data
+  async updateDriverData(driver: GUser): Promise<void> {
     try {
       // Validate driver ID
       if (!driver.id) {
@@ -72,20 +84,24 @@ export class FirestoreService {
         });
         return;
       }
-  
+
       // Update driver data
-      await this.firestore.collection('drivers').doc(driver.id).update({
-        email: driver.email,
-        name: driver.name,
-        profilePicture: driver.profilePicture,
-        phone: driver.phone,
-        vehicle: driver.vehicle,
-        license: driver.license,
-        ratings: driver.ratings,
-        role: driver.role,
-      });
-  
-      this.matSnackBar.open('Datos del conductor actualizados correctamente', 'Cerrar', {
+      await this.firestore
+        .collection('g_user')
+        .doc(driver.id)
+        .update({
+          email: driver.email,
+          name: driver.name,
+          lastName: driver.lastName ?? '',
+          profilePicture: driver.profilePicture,
+          phone: driver.phone,
+          vehicle: driver.vehicle,
+          ratings: driver.ratings,
+          role: driver.role,
+          access: driver.access,
+        });
+
+      this.matSnackBar.open('Datos actualizados correctamente', 'Cerrar', {
         duration: 4000,
       });
     } catch (error: any) {
@@ -97,10 +113,9 @@ export class FirestoreService {
       );
     }
   }
-  
 
   //get Driver's data and observe changes
-  getDrivers(collectionName: string): Observable<Driver[]> {
+  getDrivers(collectionName: string): Observable<GUser[]> {
     return this.firestore
       .collection(collectionName)
       .snapshotChanges()
@@ -109,32 +124,47 @@ export class FirestoreService {
           actions.map((a) => {
             const data = a.payload.doc.data() as any;
             const id = a.payload.doc.id;
-            return { id, ...data } as Driver;
+            return { id, ...data } as GUser;
           })
         )
       );
   }
 
   //Remove driver by id
-  async removeUserById(collectionName:string, id:string):Promise<void> {
+  async removeUserById(collectionName: string, id: string): Promise<void> {
     try {
       await this.firestore.collection(collectionName).doc(id).delete();
-      this.matSnackBar.open(
-        'Conductor removido',
-        'Cerrar',
-        { duration: 4000 }
-      );
-    } catch (error:any) {
-      this.matSnackBar.open(
-        'No se pudo borrar el Conductor.',
-        'Cerrar',
-        { duration: 4000 }
-      );
+      this.matSnackBar.open('Conductor removido', 'Cerrar', { duration: 4000 });
+    } catch (error: any) {
+      this.matSnackBar.open('No se pudo borrar el Conductor.', 'Cerrar', {
+        duration: 4000,
+      });
     }
+  }
 
-    
-    
-  
+  //delete authenticated user (UID)
+  deleteAuthenticatedUser(userId: string): Promise<any> {
+    console.log('Trying to remove: ', userId);
+    return firstValueFrom(
+      this.http.post(this.baseUrl, {
+        userId: userId,
+      })
+    );
+  }
 
+  //delete image
+  deleteImage(imagePath: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const imageRef = ref(this.storage, imagePath);
+      deleteObject(imageRef)
+        .then(() => {
+          console.log(`Image deleted: ${imagePath}`);
+          resolve();
+        })
+        .catch((error) => {
+          console.error('Error deleting image:', error);
+          reject(error);
+        });
+    });
   }
 }

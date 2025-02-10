@@ -1,5 +1,17 @@
 import 'package:passenger_app/shared/models/passenger_model.dart';
 
+class Access {
+  static const String granted = 'granted';
+  static const String denied = 'denied';
+}
+
+class Roles {
+  static const String driver = 'driver';
+  static const String passenger = 'passenger';
+  static const String admin = 'admin';
+  static const String superUser = 'superUser';
+}
+
 class GUser {
   //General user
   final String? id;
@@ -11,6 +23,7 @@ class GUser {
   final Ratings ratings;
   final List<String> role;
   final Vehicle? vehicle;
+  final String access;
 
   GUser({
     this.id,
@@ -22,21 +35,23 @@ class GUser {
     required this.ratings,
     required this.role,
     this.vehicle,
+    required this.access,
   });
 
   // Convert a map (Firestore document) to a GUser object
   factory GUser.fromMap(Map map, {String? id}) {
     return GUser(
-      id: id,
-      name: map['name'] ?? '',
-      lastName: map['lastName'],
-      email: map['email'] ?? '',
-      phone: map['phone'] ?? '',
-      profilePicture: map['profilePicture'] ?? '',
-      ratings: Ratings.fromMap(map['ratings'] ?? {}),
-      role: List<String>.from(map['role'] ?? []),
-      vehicle: map['vehicle'] != null ? Vehicle.fromMap(map['vehicle']) : null,
-    );
+        id: id,
+        name: map['name'] ?? '',
+        lastName: map['lastName'],
+        email: map['email'] ?? '',
+        phone: map['phone'] ?? '',
+        profilePicture: map['profilePicture'] ?? '',
+        ratings: Ratings.fromMap(map['ratings'] ?? {}),
+        role: List<String>.from(map['role'] ?? []),
+        vehicle:
+            map['vehicle'] != null ? Vehicle.fromMap(map['vehicle']) : null,
+        access: map['access'] ?? '');
   }
 
   // Convert a GUser object to a map (Firestore storage)
@@ -51,6 +66,7 @@ class GUser {
       'ratings': ratings.toMap(),
       'role': role,
       'vehicle': vehicle?.toMap(),
+      'access': access,
     };
   }
 }

@@ -117,6 +117,7 @@ class RequestDriverViewModel extends ChangeNotifier {
 
     //Move to Operation mode
     if (passengerNodeUpdated && driverInfo != null) {
+      await sharedUtil.makePhoneVibrate();
       sharedProvider.driverModel = driverInfo;
       _listenToDriverStatus(driverInfo.id, sharedProvider);
       _listenToDriverCoordenates(driverInfo.id, sharedProvider);
@@ -299,6 +300,7 @@ class RequestDriverViewModel extends ChangeNotifier {
           switch (status) {
             case DriverRideStatus.goingToPickUp:
               sharedProvider.driverStatus = DriverRideStatus.goingToPickUp;
+
               break;
             case DriverRideStatus.arrived:
               sharedProvider.driverStatus = DriverRideStatus.arrived;
@@ -307,7 +309,7 @@ class RequestDriverViewModel extends ChangeNotifier {
                 showDriverArrivedBotttomSheet(sharedProvider.mapPageContext!);
               }
               //   await sharedUtil.playAudio("sounds/taxi_espera.mp3");
-              sharedUtil.repeatAudio("sounds/taxi_espera.mp3");
+              await sharedUtil.repeatAudio("sounds/taxi_espera.mp3");
               break;
             case DriverRideStatus.goingToDropOff:
               sharedProvider.driverStatus = DriverRideStatus.goingToDropOff;

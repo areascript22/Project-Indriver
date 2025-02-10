@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:logger/logger.dart';
 import 'package:passenger_app/core/utils/toast_message_util.dart';
 import 'package:passenger_app/features/profile/repositories/profile_services.dart';
@@ -17,6 +18,7 @@ class ProfileViewModel extends ChangeNotifier {
   TextEditingController nameController = TextEditingController();
   TextEditingController lastnameController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
 
   bool _selectedImage = false;
   bool _showImageSelectError = false;

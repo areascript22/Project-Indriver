@@ -392,7 +392,7 @@ class RideRequestViewModel extends ChangeNotifier {
         startTime: Timestamp.now(),
         endTime: Timestamp.now(),
         distance: 0.1,
-        driverName: sharedProvider.driverModel!.name,
+        driverName: sharedProvider.driver!.name,
         passengerName: passengerInformation!.name,
         status: driverRideStatus,
         requestType: requestType!,

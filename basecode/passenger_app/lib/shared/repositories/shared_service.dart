@@ -4,6 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:passenger_app/shared/models/driver_model.dart';
 import 'package:passenger_app/shared/models/route_info.dart';
@@ -87,9 +88,14 @@ class SharedService {
     }
 
     try {
+      //Generate the name of the file
+      DateTime now = DateTime.now();
+      String formattedDate = DateFormat('yyyyMMdd_HHmmss').format(now);
+      String fileName = "audio_$formattedDate.aac";
       // Get a reference to Firebase Storage
       final storageRef = FirebaseStorage.instance.ref();
-      final audioRef = storageRef.child('audio_requests/$passengerId.aac');
+      final audioRef =
+          storageRef.child('users/recorded_audio/$passengerId/$fileName');
       final uploadTask = audioRef.putFile(File(audioFilePath));
       final snapshot = await uploadTask.whenComplete(() => null);
       final downloadUrl = await snapshot.ref.getDownloadURL();

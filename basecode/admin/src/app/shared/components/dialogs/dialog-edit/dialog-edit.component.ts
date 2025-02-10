@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -10,7 +10,7 @@ import {
   MatDialog,
   MatDialogRef,
 } from '@angular/material/dialog';
-import { Driver } from '../../../../data/interfaces/driver.interface';
+import { GUser } from '../../../../data/interfaces/driver.interface';
 import { BasicDialog } from '../../../../data/interfaces/basic.dialog';
 import { DialogBodyComponent } from '../dialog-body/dialog-body.component';
 import { FirestoreService } from '../../../services/firestore/firestore.service';
@@ -29,7 +29,7 @@ import { Roles } from '../../../utils/roles';
   templateUrl: './dialog-edit.component.html',
   styleUrl: './dialog-edit.component.css',
 })
-export class DialogEditComponent {
+export class DialogEditComponent implements OnInit {
   dataUser: any;
 
   driverForm!: FormGroup;
@@ -44,7 +44,7 @@ export class DialogEditComponent {
     private formBuilder: FormBuilder,
     private firestoreService: FirestoreService,
     private storage: Storage,
-    @Inject(MAT_DIALOG_DATA) public data: Driver,
+    @Inject(MAT_DIALOG_DATA) public data: GUser,
     public dialogRef: MatDialogRef<DialogEditComponent>
   ) {
     //Init forms
@@ -52,18 +52,25 @@ export class DialogEditComponent {
       profileImage: [data.profilePicture, Validators.required],
       email: [data.email, [Validators.required, Validators.email]],
       name: [data.name, Validators.required],
+      lastname: [data.lastName],
       phone: [
         data.phone,
         [Validators.required, Validators.pattern('^[0-9]{10}$')],
       ], // Validates 10 digit phone number
-      vehicleModel: [data.vehicle.model, Validators.required],
-      taxiCode: [data.vehicle.code, [Validators.required]],
+      vehicleModel: [data.vehicle!.model, Validators.required],
+      taxiCode: [data.vehicle!.taxiCode, [Validators.required]],
       carRegistrationNumber: [
-        data.vehicle.carRegistrationNumber,
+        data.vehicle!.carRegistrationNumber,
         [Validators.required],
       ],
-      license: [data.license, [Validators.required]],
+      license: [data.vehicle!.license, [Validators.required]],
+      accessStatus: [data.access, [Validators.required]],
     });
+  }
+
+  ngOnInit(): void {
+    console.log(this.data);
+    Roles.admin;
   }
 
   // Custom file validator to ensure a file is selected
@@ -82,7 +89,7 @@ export class DialogEditComponent {
     const fileInput = event.target as HTMLInputElement;
     if (fileInput.files && fileInput.files[0]) {
       const file = fileInput.files[0];
-      this.selectedFile=file;
+      this.selectedFile = file;
       this.imageChanged = true; // Mark image as changed
 
       // Display the selected image
@@ -105,37 +112,40 @@ export class DialogEditComponent {
 
   //Mat action Buttons
   async saveData() {
-     this.loading=true;
+    this.loading = true;
 
     //get filed from driverForm
 
     const {
       email,
       name,
+      lastname,
       phone,
       license,
       taxiCode,
       vehicleModel,
       carRegistrationNumber,
+      accessStatus,
     } = this.driverForm.value;
     //Define Vahicle fields
     const vehicle: Vehicle = {
-      code: taxiCode,
+      license: license,
+      taxiCode: taxiCode,
       model: vehicleModel,
       carRegistrationNumber: carRegistrationNumber,
     };
 
     //Upload image
-    let downloadUrl ='';
+    let downloadUrl = '';
     if (this.imageChanged) {
-      const filePath = `profile_image/drivers/${this.data.id}`;
+      const filePath = `users/profile_image/${this.data.id}`;
       const storageRef = ref(this.storage, filePath);
       //delete previos image
       try {
         await deleteObject(storageRef);
         console.log('Existing image deleted successfully');
       } catch (error: any) {
-        console.log('No se pudo eliminar la imagen previo:  ',error);
+        console.log('No se pudo eliminar la imagen previo:  ', error);
       }
 
       //Upload profile image
@@ -144,24 +154,27 @@ export class DialogEditComponent {
         storageRef,
         this.selectedFile!
       );
-       downloadUrl = await getDownloadURL(uploadTask.ref);
+      downloadUrl = await getDownloadURL(uploadTask.ref);
     }
 
     //Save driver data in Firestore
-    const driver: Driver = {
+    const driver: GUser = {
       id: this.data.id,
       email,
       name,
+      lastName: lastname ?? '',
       phone,
-      profilePicture: this.imageChanged? downloadUrl:this.data.profilePicture,
+      profilePicture: this.imageChanged
+        ? downloadUrl
+        : this.data.profilePicture,
       vehicle: vehicle,
       ratings: this.data.ratings,
-      license,
-      role: Roles.driver,
+      role: [Roles.driver],
+      access: accessStatus,
     };
     await this.firestoreService.updateDriverData(driver);
 
-    this.loading=false;
+    this.loading = false;
     this.dialogRef.close();
   }
 

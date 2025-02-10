@@ -1,6 +1,6 @@
 <!-- FORM FOR CREATING A NEW DRIVER -->
 <div class="mt-1 form-container">
-  <h2> Crear una cuenta de conductor</h2>
+  <h2>Crear una cuenta de conductor</h2>
   <form [formGroup]="driverForm" (ngSubmit)="onSubmit()">
     <!-- Select Profile Image -->
     <div class="form-group mb-3">
@@ -25,7 +25,7 @@
 
     <!-- Enter Email -->
     <div class="form-group mb-3">
-      <label for="email">Email</label>
+      <label for="email">Correo electrónico</label>
       <input
         type="email"
         id="email"
@@ -41,7 +41,7 @@
         "
         class="text-danger error-label"
       >
-        El Email es requerido.
+        El correo electrónico es requerido.
       </div>
       <div
         *ngIf="
@@ -50,7 +50,7 @@
         "
         class="text-danger error-label"
       >
-        El Email debe ser válido.
+        El correo electrónico debe ser válido.
       </div>
     </div>
     <!-- Enter your name -->
@@ -72,6 +72,28 @@
         class="text-danger error-label"
       >
         El nombre es requerido.
+      </div>
+    </div>
+
+    <!-- Enter your lastname -->
+    <div class="form-group mb-3">
+      <label for="lastName">Apellido</label>
+      <input
+        type="text"
+        id="lastName"
+        class="form-control"
+        formControlName="lastName"
+        placeholder="Apellido"
+      />
+
+      <div
+        *ngIf="
+          driverForm.get('lastName')?.hasError('required') &&
+          driverForm.get('lastName')?.touched
+        "
+        class="text-danger error-label"
+      >
+        El apellido es requerido.
       </div>
     </div>
 
@@ -168,10 +190,9 @@
         "
         class="text-danger error-label"
       >
-        La  licensia es requerido.
+        La licensia es requerido.
       </div>
     </div>
-
 
     <!-- Car registration number (Placa)-->
     <div class="form-group mb-3">
@@ -205,7 +226,7 @@
       </button> -->
 
     <!-- Botón de Enviar -->
-    <div class="" >
+    <div class="">
       <!-- Spinner -->
       <mat-spinner [diameter]="40" *ngIf="loading"></mat-spinner>
 

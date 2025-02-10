@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Driver } from '../../../../data/interfaces/driver.interface';
+import { GUser } from '../../../../data/interfaces/driver.interface';
 import { BasicDialog } from '../../../../data/interfaces/basic.dialog';
 
 @Component({
@@ -11,7 +11,7 @@ import { BasicDialog } from '../../../../data/interfaces/basic.dialog';
 export class DialogBodyComponent {
   constructor(
     public dialogRef: MatDialogRef<DialogBodyComponent>,
-    @Inject(MAT_DIALOG_DATA) public data:BasicDialog,
+    @Inject(MAT_DIALOG_DATA) public data: BasicDialog
   ) {}
 
   //ON confirm

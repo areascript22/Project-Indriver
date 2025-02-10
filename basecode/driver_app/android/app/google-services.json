@@ -1,22 +1,22 @@
 {
   "project_info": {
-    "project_number": "328876787901",
-    "firebase_url": "https://indriver-clon-default-rtdb.firebaseio.com",
-    "project_id": "indriver-clon",
-    "storage_bucket": "indriver-clon.firebasestorage.app"
+    "project_number": "1029433641745",
+    "firebase_url": "https://taxi-riobamba-default-rtdb.firebaseio.com",
+    "project_id": "taxi-riobamba",
+    "storage_bucket": "taxi-riobamba.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:328876787901:android:02b9581903ad0e7e080fd4",
+        "mobilesdk_app_id": "1:1029433641745:android:2018d73263a9baaeeedab0",
         "android_client_info": {
-          "package_name": "com.areascript.taxiconductor"
+          "package_name": "com.areascript1.taxiconductor"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAU774UqZTwdjrFuhLag2Pmx2bpyNM6IxM"
+          "current_key": "AIzaSyDAMJYuaPz5cRQYk6O9EqB-8RBGcKG9gzQ"
         }
       ],
       "services": {
@@ -27,15 +27,15 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:328876787901:android:ff8010cb732c6348080fd4",
+        "mobilesdk_app_id": "1:1029433641745:android:bedeb4023a6fd3efeedab0",
         "android_client_info": {
-          "package_name": "com.example.passenger_app"
+          "package_name": "com.areascript1.taxipasajero"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAU774UqZTwdjrFuhLag2Pmx2bpyNM6IxM"
+          "current_key": "AIzaSyDAMJYuaPz5cRQYk6O9EqB-8RBGcKG9gzQ"
         }
       ],
       "services": {

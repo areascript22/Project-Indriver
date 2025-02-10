@@ -49,33 +49,29 @@ class SharedUtil {
   //Make vibrate
   Future<void> makePhoneVibrate() async {
     if (await Vibration.hasVibrator()) {
-      Vibration.vibrate();
+      await Vibration.vibrate();
     } else {
       logger.e("Vibration is not available.");
     }
   }
 
+  Future<void> repeatAudio(String filePath) async {
+    const duration = Duration(minutes: 5);
+    const interval = Duration(seconds: 2); // Adjust this interval as needed
+    final startTime = DateTime.now();
+    await playAudio(filePath);
+    _audioTimer = Timer.periodic(interval, (timer) async {
+      if (DateTime.now().difference(startTime) >= duration) {
+        timer.cancel(); // Stop repeating after 5 minutes
+        _audioTimer = null;
+      } else {
+        await playAudio(filePath); // Call the playAudio function
+      }
+    });
+  }
 
-
-
-Future<void> repeatAudio(String filePath) async {
-  const duration = Duration(minutes: 5);
-  const interval = Duration(seconds: 5); // Adjust this interval as needed
-  final startTime = DateTime.now();
-
-  _audioTimer = Timer.periodic(interval, (timer) async {
-    if (DateTime.now().difference(startTime) >= duration) {
-      timer.cancel(); // Stop repeating after 5 minutes
-      _audioTimer = null;
-      
-    } else {
-      await playAudio(filePath); // Call the playAudio function
-    }
-  });
-}
-
-void stopAudioLoop() {
-  _audioTimer?.cancel();
-  _audioTimer = null; // Reset the timer variable
-}
+  void stopAudioLoop() {
+    _audioTimer?.cancel();
+    _audioTimer = null; // Reset the timer variable
+  }
 }

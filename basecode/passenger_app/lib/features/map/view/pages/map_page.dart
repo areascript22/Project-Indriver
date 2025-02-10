@@ -205,7 +205,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
               !mapViewModel.enteredInSelectingLocationMode &&
               sharedProvider.requestDriverOrDelivery &&
               sharedProvider.driverModel == null)
-            Positioned(
+            Positioned( 
               left: 0,
               right: 0,
               bottom: 0,

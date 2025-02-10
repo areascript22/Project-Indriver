@@ -1,4 +1,4 @@
-import 'package:driver_app/shared/models/driver.dart';
+import 'package:driver_app/shared/models/g_user.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:logger/logger.dart';
@@ -6,11 +6,11 @@ import 'package:logger/logger.dart';
 class DeliveryRequestService {
   //TRANSACTION: Write Driver data under passanger delivery reuqest
   static Future<bool> writeDriverDataOnce(
-      String passengerId, Position position, Driver driver) async {
+      String passengerId, Position position, GUser driver) async {
     final Logger logger = Logger();
     final databaseRef =
         FirebaseDatabase.instance.ref('delivery_requests/$passengerId/driver');
-
+    logger.f("TEST WR: Passenger id: $passengerId , ");
     try {
       final result = await databaseRef.runTransaction((currentData) {
         // Abort if the path already contains data

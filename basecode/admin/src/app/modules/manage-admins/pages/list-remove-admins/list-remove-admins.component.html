@@ -1,0 +1,45 @@
+<div class="card-container">
+  <mat-card
+    class="example-card"
+    appearance="outlined"
+    *ngFor="let item of items"
+  >
+    <mat-card-header>
+      <div mat-card-avatar>
+        <img
+          [src]="item.profilePicture"
+          alt="{{ item.name }}"
+          class="avatar-image"
+        />
+      </div>
+      <mat-card-title>{{ item.name }} {{ item.lastName }}</mat-card-title>
+      <mat-card-subtitle>{{ item.phone }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-actions class="card-actions">
+      <!-- Access Badge -->
+      <div
+        class="access-badge"
+        [ngClass]="{
+          granted: item.access === 'granted',
+          denied: item.access === 'denied'
+        }"
+      >
+        {{ getAccess(item) }}
+      </div>
+
+      <div class="actions-right">
+        <button mat-button (click)="openEditAdminDialog(item, '0ms', '0ms')">
+          Editar
+        </button>
+        <button
+          mat-raised-button
+          color="warn"
+          (click)="openDialog('0ms', '0ms', item)"
+        >
+          Eliminar
+        </button>
+      </div>
+    </mat-card-actions>
+  </mat-card>
+</div>

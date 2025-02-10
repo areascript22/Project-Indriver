@@ -1,10 +1,13 @@
 import 'package:driver_app/features/delivery_request/model/delivery_status.dart';
+import 'package:driver_app/features/delivery_request/view/widgets/delivery_by_audio.dart';
 import 'package:driver_app/features/delivery_request/viewmodel/delivery_request_viewmodel.dart';
 import 'package:driver_app/features/home/view/widgets/custom_elevated_button.dart';
 import 'package:driver_app/shared/models/request_type.dart';
 import 'package:driver_app/features/delivery_request/view/widgets/delivery_request_type.dart';
 import 'package:driver_app/shared/utils/shared_util.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 
@@ -74,100 +77,124 @@ class _DeliveryInfoCardState extends State<DeliveryInfoCard> {
                       ),
                       //Locations pick-up and drop-off
                       const SizedBox(width: 20),
-                      //Center content
 
-                      //Reqeust type card
-
-                      //Coords
-
+                      //Content
                       Expanded(
-                        child: Container(
-                          decoration: const BoxDecoration(),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              //type
-                              DeliveryRequestTypeCard(
-                                  requestType: deliveryRequestViewModel
-                                      .deliveryRequestModel!.requestType),
-                              //coords
-                              if (deliveryRequestViewModel
-                                      .deliveryRequestModel!.requestType ==
-                                  RequestType.byCoordinates)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    //Pick Up location
-                                    Row(
-                                      children: [
-                                        const Icon(
-                                          Ionicons.location,
-                                          color: Colors.green,
-                                        ),
-                                        Expanded(
-                                          child: Text(
-                                            deliveryRequestViewModel
-                                                .deliveryRequestModel!
-                                                .information
-                                                .pickUpLocation,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    //Drop off location
-                                    Row(
-                                      children: [
-                                        const Icon(
-                                          Ionicons.location,
-                                          color: Colors.blue,
-                                        ),
-                                        Expanded(
-                                          child: Text(
-                                            deliveryRequestViewModel
-                                                .deliveryRequestModel!
-                                                .information
-                                                .dropOffLocation,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    //Details
-                                    const SizedBox(height: 4.0),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'Detalles',
-                                          style: TextStyle(
-                                              color: Colors.grey[600],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            //type
+                            DeliveryRequestTypeCard(
+                                requestType: deliveryRequestViewModel
+                                    .deliveryRequestModel!.requestType),
+                            const SizedBox(height: 4.0),
+                            //coords
+                            if (deliveryRequestViewModel
+                                    .deliveryRequestModel!.requestType ==
+                                RequestType.byCoordinates)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  //Pick Up location
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Ionicons.location,
+                                        color: Colors.green,
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          deliveryRequestViewModel
+                                              .deliveryRequestModel!
+                                              .information
+                                              .pickUpLocation,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
                                               fontWeight: FontWeight.bold),
                                         ),
-                                        const SizedBox(width: 4.0),
-                                        Text(
-                                          '·',
-                                          style: TextStyle(
-                                              color: Colors.grey[600]),
+                                      ),
+                                    ],
+                                  ),
+                                  //Drop off location
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Ionicons.location,
+                                        color: Colors.blue,
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          deliveryRequestViewModel
+                                              .deliveryRequestModel!
+                                              .information
+                                              .dropOffLocation,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        const SizedBox(width: 4.0),
-                                        Text(
+                                      ),
+                                    ],
+                                  ),
+                                  //Details
+                                  const SizedBox(height: 6.0),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Detinatario',
+                                        style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(width: 4.0),
+                                      Text(
+                                        '·',
+                                        style:
+                                            TextStyle(color: Colors.grey[600]),
+                                      ),
+                                      const SizedBox(width: 4.0),
+                                      Flexible(
+                                        child: Text(
                                           deliveryRequestViewModel
                                               .deliveryRequestModel!
                                               .details
-                                              .details,
+                                              .recipientName,
                                           style: TextStyle(
                                               color: Colors.grey[600]),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
                                         ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                            ],
-                          ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4.0),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Detalles',
+                                        style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(width: 4.0),
+                                      Text(
+                                        deliveryRequestViewModel
+                                            .deliveryRequestModel!
+                                            .details
+                                            .details,
+                                        style:
+                                            TextStyle(color: Colors.grey[600]),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            if (deliveryRequestViewModel
+                                    .deliveryRequestModel!.requestType ==
+                                RequestType.byRecordedAudio)
+                              DeliveryByAudio(),
+                          ],
                         ),
                       ),
 

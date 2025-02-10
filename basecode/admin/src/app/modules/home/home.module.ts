@@ -12,13 +12,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { CustomSidenavComponent } from '../../shared/components/custom-sidenav/custom-sidenav.component';
 import { SharedModule } from '../../shared/shared.module';
 import { RouterModule } from '@angular/router';
-
+import { MatMenuModule } from '@angular/material/menu';
 
 @NgModule({
-  declarations: [
-    HomeComponent
-
-  ],
+  declarations: [HomeComponent],
   imports: [
     CommonModule,
     HomeRoutingModule,
@@ -29,7 +26,7 @@ import { RouterModule } from '@angular/router';
     MatButtonModule,
     SharedModule,
     RouterModule,
-
-  ]
+    MatMenuModule,
+  ],
 })
-export class HomeModule { }
+export class HomeModule {}

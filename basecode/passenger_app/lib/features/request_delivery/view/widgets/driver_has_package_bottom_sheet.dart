@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:passenger_app/shared/models/driver_model.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
+import 'package:passenger_app/shared/util/shared_util.dart';
 import 'package:passenger_app/shared/widgets/custom_elevated_button.dart';
 import 'package:provider/provider.dart';
 
@@ -16,9 +17,15 @@ class DriverHasPackageBottomSheet extends StatefulWidget {
 
 class _DriverHasPackageBottomSheetState
     extends State<DriverHasPackageBottomSheet> {
+  final sharedUtil = SharedUtil();
   @override
   void initState() {
     super.initState();
+    initializePage();
+  }
+
+  void initializePage() async {
+    await sharedUtil.makePhoneVibrate();
   }
 
   @override
@@ -35,18 +42,24 @@ class _DriverHasPackageBottomSheetState
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            //Message "I have arrived"
-            Text(
-              '${driverModel!.name} ha recogido su pedido.',
-              style: const TextStyle(fontSize: 18),
-            ),
-            //Vehicle model
-            Text(
-              driverModel.vehicleModel,
-              style: const TextStyle(fontSize: 17),
-            ),
-            const SizedBox(height: 20),
+            if (driverModel != null)
+              Column(
+                children: [
+                  //Message "I have arrived"
+                  Text(
+                    '${driverModel.name} ha recogido su pedido.',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  //Vehicle model
+                  Text(
+                    driverModel.vehicleModel,
+                    style: const TextStyle(fontSize: 17),
+                  ),
+                ],
+              ),
+
             //BUTTON: Ready, on the way
+            const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(

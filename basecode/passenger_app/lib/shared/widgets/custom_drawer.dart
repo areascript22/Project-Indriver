@@ -7,6 +7,7 @@ import 'package:passenger_app/features/profile/view/pages/edit_profile_page.dart
 import 'package:passenger_app/features/ride_history/repository/pages/ride_history_page.dart';
 import 'package:passenger_app/shared/models/g_user.dart';
 import 'package:passenger_app/shared/providers/shared_provider.dart';
+import 'package:passenger_app/shared/widgets/user_avatar.dart';
 import 'package:provider/provider.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -36,28 +37,12 @@ class CustomDrawer extends StatelessWidget {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CircleAvatar(
-                            radius: 35,
-                            backgroundColor: Colors.transparent,
-                            child: ClipOval(
-                              child: passenger.profilePicture.isNotEmpty
-                                  ? FadeInImage.assetNetwork(
-                                      placeholder: 'assets/img/no_image.png',
-                                      image: passenger.profilePicture,
-                                      fadeInDuration:
-                                          const Duration(milliseconds: 50),
-                                      fit: BoxFit.cover,
-                                      width: 100,
-                                      height: 100,
-                                    )
-                                  : Image.asset(
-                                      'assets/img/default_profile.png',
-                                      fit: BoxFit.cover,
-                                      width: 100,
-                                      height: 100,
-                                    ),
-                            ),
+                          //image
+                          UserAvatar(
+                            imageUrl: passenger.profilePicture,
                           ),
+
+                          //Passenger info
                           const SizedBox(width: 10),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

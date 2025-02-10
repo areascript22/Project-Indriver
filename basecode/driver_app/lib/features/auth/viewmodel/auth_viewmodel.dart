@@ -2,6 +2,7 @@ import 'package:driver_app/core/utils/toast_message_util.dart';
 import 'package:driver_app/features/auth/repository/auth_service.dart';
 import 'package:driver_app/features/auth/repository/firestore_service.dart';
 import 'package:driver_app/shared/models/driver.dart';
+import 'package:driver_app/shared/models/g_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -21,7 +22,7 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   //Functions
-  Future<Object> getAuthenticatedDriver() async {
+  Future<GUser?> getAuthenticatedDriver() async {
     return FirestoreService.getAuthenticatedDriver();
   }
 
